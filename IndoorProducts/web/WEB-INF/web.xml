@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <context-param>
+        <param-name>osm_url</param-name>
+        <param-value>http://overpass.osm.rambler.ru/cgi/interpreter</param-value>
+    </context-param>
+	<context-param>
+        <param-name>file_access_class</param-name>
+        <param-value>intransix.indoor.netserver.NetFileAccess</param-value>
+    </context-param>
+    <context-param>
+        <param-name>net_file_server</param-name>
+        <param-value>http://localhost:8080/mapdata</param-value>
+    </context-param>
+    <servlet>
+        <servlet-name>CreateProducts</servlet-name>
+        <servlet-class>intransix.indoor.provision.CreateProducts</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreateProducts</servlet-name>
+        <url-pattern>/createproducts</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+</web-app>
