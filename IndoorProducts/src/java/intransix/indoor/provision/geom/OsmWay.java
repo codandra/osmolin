@@ -21,6 +21,10 @@ public class OsmWay extends OsmFeature {
 	public OsmWay(long id) {
 		super(id);
 	}
+
+	public ArrayList<OsmNode> getNodes() {
+		return nodes;
+	}
 	
 	public static void loadOsmWay(long id,
 			JSONObject json, 
@@ -41,6 +45,9 @@ public class OsmWay extends OsmFeature {
 		if(cnt <= 1) return;
 		
 		long nodeId;
+		long zcontext = INVALID_ID;
+		int zlevel = OsmLevel.INVALID_ZLEVEL;
+		boolean firstNode = true;
 		for(int i = 0; i < cnt; i++) {
 			nodeId = wayNodes.optLong(i,INVALID_ID);
 			if(nodeId == INVALID_ID) continue;
@@ -48,7 +55,22 @@ public class OsmWay extends OsmFeature {
 			OsmNode node = mapProvision.getOsmNode(nodeId);
 			//if a node is missing, don't load this way
 			if(node == null) return;
-			
+
+			//set the level info, if it is present
+			if(firstNode) {
+				//copy the zcontext from the node
+				zcontext = node.getZcontext();
+				zlevel = node.getZlevel();
+			}
+			else {
+				//if there is disagreement, clear the z info
+				if((zcontext != INVALID_ID)&&(zcontext != node.getZcontext())&&(zlevel != node.getZlevel())) {
+					zcontext = INVALID_ID;
+					zlevel = OsmLevel.INVALID_ZLEVEL;
+				}
+			}
+
+			//add node
 			way.nodes.add(node);
 		}
 		

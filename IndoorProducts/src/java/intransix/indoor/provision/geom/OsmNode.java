@@ -22,6 +22,14 @@ public class OsmNode extends OsmFeature {
 	public OsmNode(long id) {
 		super(id);
 	}
+
+	public double getLat() {
+		return lat;
+	}
+
+	public double getLon() {
+		return lon;
+	}
 	
 	public static void loadOsmNode(long id,
 			JSONObject json, 
@@ -41,6 +49,7 @@ public class OsmNode extends OsmFeature {
 		
 		//try to read the zlevel
 		node.zlevel = OsmNode.getTagInt(json, mapTemplate.KEY_ZLEVEL,OsmLevel.INVALID_ZLEVEL);
+		node.zcontext = OsmNode.getTagLong(json, mapTemplate.KEY_ZCONTEXT,INVALID_ID);
 		
 		//load feature properties
 		boolean success = node.loadFeatureProperties(json,mapTemplate);
