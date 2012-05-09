@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<script>
+
+			function testSubmission(doId) {
+
+				var element = document.getElementById("nameElement");
+				var file = element.value;
+				var element = document.getElementById("keyElement");
+				var id = element.value;
+				var element = document.getElementById("versionElement");
+				
+				var url = "file/" + file + "/" + id;
+				
+				var version = element.value;
+				if(version.length > 0) {
+					url += "/" + version;
+				}
+				
+				submit("GET",url,null,downloadComplete);
+			}
+			
+			
+			function downloadComplete(result) {
+				var element = document.getElementById("outElement");
+				element.value = result;
+			}
+
+			function submit(method,url,body,onDownload) {
+
+				var xmlhttp = new XMLHttpRequest();
+
+				xmlhttp.onreadystatechange=function() {
+					if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+						onDownload(xmlhttp.responseText);
+
+					}
+					else if(xmlhttp.readyState==4) {
+						alert("Error in request, Status: " + xmlhttp.status);
+					}
+				}
+
+				xmlhttp.open(method,url,true);
+				xmlhttp.send(body);
+			}
+
+		</script>
+	</head>
+	<body>
+		<h1>Download Test</h1>
+		name: <textarea id="nameElement" cols="31"></textarea><br>
+		key: <textarea id="keyElement" cols="31"></textarea><br>
+		version(optional): <textarea id="versionElement" cols="31"></textarea><br>
+		<input type="button" value="ID Test" onclick="testSubmission(true)"/><br>
+		out: <textarea id="outElement" cols="70" rows="30"></textarea><br>
+		
+	</body>
+</html>
