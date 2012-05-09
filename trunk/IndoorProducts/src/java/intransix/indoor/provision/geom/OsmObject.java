@@ -42,12 +42,6 @@ public class OsmObject {
 	private final static String MAP_UPLOAD_NAME = "indoormap";
 	private final static String LVLGEOM_UPLOAD_NAME = "lvlgeom";	
 	
-	
-	
-	
-	
-	private final static String DEFAULT_ANGLE_KEY = "default_angle";
-	
 	//========================
 	// Properties
 	//========================
@@ -61,6 +55,14 @@ public class OsmObject {
 	public OsmObject(long id) {
 		this.id = id;
 		this.loaded = false;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public boolean getIsLoaded() {
+		return loaded;
 	}
 	
 	public static void loadOsmObject(JSONObject json, 
@@ -94,6 +96,11 @@ public class OsmObject {
 		final JSONObject tags = element.optJSONObject(TAGS_KEY);
 		if(tags == null) return defaultValue;
 		return tags.optInt(tag,defaultValue);
+	}
+	public static long getTagLong(JSONObject element, String tag, long defaultValue) {
+		final JSONObject tags = element.optJSONObject(TAGS_KEY);
+		if(tags == null) return defaultValue;
+		return tags.optLong(tag,defaultValue);
 	}
 	public static double getTagDouble(JSONObject element, String tag, double defaultValue) {
 		final JSONObject tags = element.optJSONObject(TAGS_KEY);
