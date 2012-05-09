@@ -1,0 +1,27 @@
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script src="indoormap/indoor.js"></script>
+		<script src="indoormap/indoormap.js"></script>
+		<script src="indoormap/basestylemap.js"></script>
+		<script src="indoormap/request.js"></script>
+		<script src="http://openlayers.org/api/OpenLayers.js"></script>
+		<script type="text/javascript">
+            var indoorMap;
+            function init() {
+				
+				var styleMap = getStyleMap();
+				indoorMap = new indoor.IndoorMap("map",styleMap);
+				
+
+				indoorMap.openMap(2127658);
+				//indoorMap.openMap(1370729);
+				
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<div style="width:100%; height:100%" id="map"></div>
+	</body>
+</html>
