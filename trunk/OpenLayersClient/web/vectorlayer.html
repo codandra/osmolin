@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+        <title>All Overlays Example</title>
+		<link rel="stylesheet" href="http://openlayers.org/dev/theme/default/style.css" type="text/css">
+        <link rel="stylesheet" href="http://openlayers.org/dev/examples/style.css" type="text/css">
+        <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
+        <script type="text/javascript">
+            var map;
+            function init() {
+//                map = new OpenLayers.Map({
+//                    "div": "map",
+//                    "allOverlays": true,
+//                    "maxExtent": new OpenLayers.Bounds(
+//                        1549471.9221, 6403610.94, 1550001.32545, 6404015.8
+//					)
+//                });
+				               
+//				map = new OpenLayers.Map({
+//                    "div": "map",
+//                    "allOverlays": true,
+//					"maxExtent": new OpenLayers.Bounds(
+//                        0,0,405,525
+//                    )
+//                });
+				map = new OpenLayers.Map({
+                    "div": "map",
+                    "allOverlays": true,
+					"maxExtent": new OpenLayers.Bounds(
+                        0,0,45,54
+                    )
+                });
+		
+var defaultStyle = new OpenLayers.Style();
+var rule_basic = new OpenLayers.Rule({
+symbolizer: {
+strokeWidth: 5
+}
+});
+var rule_highlight = new OpenLayers.Rule({
+"filter": new OpenLayers.Filter.Comparison({
+"type": OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+"property": "name",
+"value": null
+}),
+"symbolizer": {
+"label": "${name}",
+"fontColor": "#000000",
+"fontOpacity": 1,
+"fontFamily": "Arial",
+"fontSize": 16,
+"fontWeight": "600"}
+});
+defaultStyle.addRules([rule_basic, rule_highlight]);
+
+                // give the features some style
+                var styles = new OpenLayers.StyleMap(defaultStyle);
+				
+//				var styles = new OpenLayers.StyleMap({
+//					"default":{
+//						"strokeWidth":5
+//					}
+//				});
+				
+				         
+//                // add rules from the above lookup table
+                styles.addUniqueValueRules("default", "type", {
+                    "app:background": {"strokeColor": "#000000", "strokeWidth": 2, "fillColor":"#eeeeee"},
+                    "buildingpart:room": {
+						"strokeColor": "#222222", 
+//						"strokeWidth": 2, 
+						"fillColor":"#ff8080"
+
+//						fillOpacity: 0.5,
+//						pointRadius: 6,
+//						// label with \n linebreaks
+//						label : "${name}",
+//
+//						fontColor: "#000000",
+//						fontSize: "12px",
+//						fontFamily: "Courier New, monospace",
+//						fontWeight: "bold",
+//						labelOutlineColor: "white",
+//						labelOutlineWidth: 3			
+			
+		
+	},
+                    "buildingpart:kiosk": {"strokeColor": "#444444", "strokeWidth": 2, "fillColor":"#ffc0c0"},
+                    "buildingpart:corridor": {"strokeColor": "#666666", "strokeWidth": 2, "fillColor":"#ffc0c0"},
+                    "buildingpart:unit": {"strokeColor": "#888888", "strokeWidth": 2, "fillColor":"#e0ffc0"},
+					"buildingpart:verticalpassage:stairway":{
+						"strokeColor": "#888888", 
+						"strokeWidth": 2, 
+						"fillColor":"#e0ffc0"
+			
+					
+//		fillOpacity: 0.5,
+//						pointRadius: 6,
+//						// label with \n linebreaks
+//						label : "${name}",
+//
+//						fontColor: "#000000",
+//						fontSize: "12px",
+//						fontFamily: "Courier New, monospace",
+//						fontWeight: "bold",
+//						labelOutlineColor: "white",
+//						labelOutlineWidth: 3			
+			
+		},
+					"buildingpart:hall":{"strokeColor": "#888888", "strokeWidth": 2, "fillColor":"#e0ffc0"}
+					
+				
+                });
+
+
+
+                var vectors = new OpenLayers.Layer.Vector("Lines", {
+                    "strategies": [new OpenLayers.Strategy.Fixed()],                
+                    "protocol": new OpenLayers.Protocol.HTTP({
+                        "url": "geojson2.json",
+                        "format": new OpenLayers.Format.GeoJSON()
+                    }),
+                    "styleMap": styles
+                });
+//				var vectors = new OpenLayers.Layer.Vector("Lines", {
+//                    "strategies": [new OpenLayers.Strategy.Fixed()],                
+//                    "protocol": new OpenLayers.Protocol.HTTP({
+//                        "url": "sample.json",
+//                        "format": new OpenLayers.Format.GeoJSON()
+//                    }),
+//                    "styleMap": styles
+//                });
+
+OpenLayers.Renderer.defaultSymbolizer = {
+	"label":""
+};
+            
+                map.addLayer(vectors);
+//                map.addControl(new OpenLayers.Control.LayerSwitcher());
+                map.zoomToMaxExtent();
+
+            }            
+
+        </script>
+    </head>
+    <body onload="init()">
+        <h1 id="title">OpenLayers Overlays Only Example</h1>
+        <div id="tags">
+            overlay, baselayer, light
+        </div> 
+        <p id="shortdesc">
+            Demonstrates a map with overlays only.
+        </p>
+        <div id="map" class="smallmap"></div>    
+        <div id="docs">
+            To create a map that allows any draw order with all layer types
+            and lets you set the visibility of any layer independently, set
+            the allOverlays property on the map to true.
+        </div>
+    </body>
+</html>
