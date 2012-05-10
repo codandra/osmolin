@@ -40,6 +40,10 @@ public abstract class OsmFeature extends OsmObject implements Comparable<OsmFeat
 	public FeatureTypeInfo getFeatureTypeInfo() {
 		return fti;
 	}
+	
+	public void setFeatureTypeInfo(FeatureTypeInfo fti) {
+		this.fti = fti;
+	}
 
 	/** This method returns true if the feature should be placed in the map. */
 	public boolean placeInMap() {

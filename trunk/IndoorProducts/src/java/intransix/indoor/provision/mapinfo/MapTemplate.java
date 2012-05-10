@@ -113,7 +113,7 @@ public class MapTemplate extends TypeBaseInfo {
 	}
 	
 	/** This method returns the feature type for the shell object. */
-	public FeatureTypeInfo getShellFeatureType() throws Exception {
+	public FeatureTypeInfo getShellFeatureType() {
 		return shellFeatureType;
 	}
 }
