@@ -44,46 +44,6 @@ public class MapProvision {
 	public MapProvision(DataLoader dataLoader) {
 		this.dataLoader = dataLoader;
 	}
-	
-	public OsmNode getOsmNode(Long id) {
-		OsmNode osmNode = nodeMap.get(id);
-		if(osmNode == null) {
-			osmNode = new OsmNode(id);
-		}
-		return osmNode;
-	}
-	
-	public OsmWay getOsmWay(Long id) {
-		OsmWay osmWay = wayMap.get(id);
-		if(osmWay == null) {
-			osmWay = new OsmWay(id);
-		}
-		return osmWay;
-	}
-	
-	public OsmLevel getOsmLevel(Long id) {
-		OsmLevel osmLevel = levelMap.get(id);
-		if(osmLevel == null) {
-			osmLevel = new OsmLevel(id);
-		}
-		return osmLevel;
-	}
-	
-	public OsmMap getOsmMap(Long id) {
-		OsmMap osmMap = mapMap.get(id);
-		if(osmMap == null) {
-			osmMap = new OsmMap(id);
-		}
-		return osmMap;
-	}
-	
-	public OsmMultipoly getOsmMultipoly(Long id) {
-		OsmMultipoly osmMultipoly = polyMap.get(id);
-		if(osmMultipoly == null) {
-			osmMultipoly = new OsmMultipoly(id);
-		}
-		return osmMultipoly;
-	}
 
 	public void createAndUpload(String mapTemplateName, String structureId, String name) throws Exception {
 		
@@ -118,7 +78,7 @@ if(true) throw new Exception("Test finished");
 				map.setVersion(version);
 
 				//get the map object
-				JSONObject mapJson = map.getMapJson();
+				JSONObject mapJson = map.getMapJson(mapTemplate);
 				fileAccess.upload(MAP_UPLOAD_NAME,mapIdString,version,mapJson);
 
 				for(OsmLevel level:map.getLevels()) {
@@ -126,7 +86,7 @@ if(true) throw new Exception("Test finished");
 					//make sure the level are loaded
 					if(level.getIsLoaded()) {
 						//get the level object
-						JSONObject levelJson = level.getLevelJson();
+						JSONObject levelJson = level.getLevelGeoJson(mapTemplate);
 						if(levelJson != null) {
 							String lidString = String.valueOf(level.getId());
 							fileAccess.upload(LVLGEOM_UPLOAD_NAME,lidString,version,levelJson);
@@ -145,6 +105,51 @@ if(true) throw new Exception("Test finished");
 			}
 		}	
 
+	}
+	
+		public OsmNode getOsmNode(Long id) {
+		OsmNode osmNode = nodeMap.get(id);
+		if(osmNode == null) {
+			osmNode = new OsmNode(id);
+			nodeMap.put(id,osmNode);
+		}
+		return osmNode;
+	}
+	
+	public OsmWay getOsmWay(Long id) {
+		OsmWay osmWay = wayMap.get(id);
+		if(osmWay == null) {
+			osmWay = new OsmWay(id);
+			wayMap.put(id,osmWay);
+		}
+		return osmWay;
+	}
+	
+	public OsmLevel getOsmLevel(Long id) {
+		OsmLevel osmLevel = levelMap.get(id);
+		if(osmLevel == null) {
+			osmLevel = new OsmLevel(id);
+			levelMap.put(id,osmLevel);
+		}
+		return osmLevel;
+	}
+	
+	public OsmMap getOsmMap(Long id) {
+		OsmMap osmMap = mapMap.get(id);
+		if(osmMap == null) {
+			osmMap = new OsmMap(id);
+			mapMap.put(id,osmMap);
+		}
+		return osmMap;
+	}
+	
+	public OsmMultipoly getOsmMultipoly(Long id) {
+		OsmMultipoly osmMultipoly = polyMap.get(id);
+		if(osmMultipoly == null) {
+			osmMultipoly = new OsmMultipoly(id);
+			polyMap.put(id,osmMultipoly);
+		}
+		return osmMultipoly;
 	}
 	
 	//====================================
@@ -187,9 +192,19 @@ if(true) throw new Exception("Test finished");
 				int zlevel = level.getZlevel();
 				String key = OsmLevel.createZlevelKey(zcontext,zlevel);
 				zlevelMap.put(key, level);
+		
+//RELATION DEFINED LEVELS////////////////////////////////
+				//any existing features in this level do not have the zcontext set!!!
+				for(OsmFeature feature:level.getFeatures()) {
+					feature.setZcontext(zcontext);
+				}
+/////////////////////////////////////////////////////
 			}
 		}
 		
+//NODE DEFINED LEVELS////////////////////////////////
+//if the feature levels are defined in the level relation, we will re-add all the level features
+//but that shouldn't be a problem because we use a hash set.
 		//polulate levels with features
 		for(OsmFeature feature:nodeMap.values()) {
 			addFeatureToLevel(feature,zlevelMap);
@@ -197,7 +212,7 @@ if(true) throw new Exception("Test finished");
 		for(OsmFeature feature:wayMap.values()) {
 			addFeatureToLevel(feature,zlevelMap);
 		}
-		
+/////////////////////////////////////////////////////
 	}
 
 	private void addFeatureToLevel(OsmFeature feature, HashMap<String,OsmLevel> zlevelMap) {

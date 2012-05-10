@@ -7,13 +7,15 @@ package intransix.indoor.provision.geom;
 import java.util.*;
 import intransix.indoor.provision.MapProvision;
 import intransix.indoor.provision.mapinfo.MapTemplate;
+import intransix.indoor.geom.AffineTransform;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 /**
  *
  * @author sutter
  */
-public class OsmLevel extends OsmRelation {
+public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 	
 	public final static int INVALID_ZLEVEL = Integer.MIN_VALUE;
 	
@@ -44,19 +46,15 @@ public class OsmLevel extends OsmRelation {
 		this.map = map;
 	}
 
-	public OsmMap getMap() {
-		return map;
-	}
+//	public OsmMap getMap() {
+//		return map;
+//	}
 
 	/** This method creates a key object for looking up zcontext and zlevel. If INVALID_ID is passed in
 	 * for zcontext or INVALID_ZLEVEL is passed in for zlevel, null is returned.*/
 	public static String createZlevelKey(long zcontext, int zlevel) {
 		if((zcontext == INVALID_ID)||(zlevel == INVALID_ZLEVEL)) return null;
 		else return String.valueOf(zcontext) + ":" + zlevel;
-	}
-
-	public JSONObject getLevelJson() {
-		return null;
 	}
 	
 	public static void loadOsmLevel(long id,
@@ -80,6 +78,37 @@ public class OsmLevel extends OsmRelation {
 		level.loaded = true;
 	}
 	
+	public JSONObject getMapJsonEntry(MapTemplate mapTemplate) throws Exception {
+		JSONObject indoorLevel = new JSONObject();
+		indoorLevel.put("id",getId());
+		indoorLevel.put("z",zlevel);
+		indoorLevel.put("nm",name);
+		return indoorLevel;
+	}
+	
+	public JSONObject getLevelGeoJson(MapTemplate mapTemplate) throws Exception {
+
+		JSONObject levelGeoJson = new JSONObject();
+		levelGeoJson.put("id",getId());
+		levelGeoJson.put("mid",map.getId());
+		levelGeoJson.put("v",map.getVersion());
+		levelGeoJson.put("l","en"); //fix this!!!
+		levelGeoJson.put("ft","lvlg1");
+
+		//add the geometry
+		ArrayList<OsmFeature> featureList = getOrderedFeatureList();
+		JSONArray featureJsonArray = new JSONArray();
+		AffineTransform lonlatToXY = map.getLonLatToXY();
+		for(OsmFeature feature:featureList) {
+			JSONObject featureJson = feature.getJsonObject(mapTemplate,lonlatToXY);
+			if(featureJson != null) {
+				featureJsonArray.put(featureJson);
+			}
+		}
+		
+		return levelGeoJson;
+	}
+	
 	@Override
 	protected void loadMember(long memberId, String type, String role,
 			MapTemplate mapTemplate, MapProvision mapProvision) {
@@ -97,6 +126,7 @@ public class OsmLevel extends OsmRelation {
 			}
 		}
 		else if(role.equalsIgnoreCase(mapTemplate.ROLE_FEATURE)) {
+//RELATION DEFINED LEVELS///////////////////////////////
 			//this will only be present if features are included in the level relation
 			//alternatively, thenode should specify the zlevel and zcontext
 			
@@ -108,63 +138,27 @@ public class OsmLevel extends OsmRelation {
 			else if(type.equalsIgnoreCase(OsmObject.WAY_TYPE)) {
 				feature = mapProvision.getOsmWay(memberId);
 			}
-			if((feature != null)&&(map != null)) {
-				feature.setZInfo(map.getId(),zlevel);
+			if(feature != null) {
+				//we might not know zcontext yet!!! Set that later.
+				feature.setZlevel(zlevel);
 				this.addFeature(feature);
 			}
+///////////////////////////////////////////////////////////////////
 		}
 	}
-
-//	/** This method creates a level object. */
-//	private void createLevel(JSONObject osmLevel, JSONArray indoorLevelList) throws Exception {
-//		long id = osmLevel.getLong("id");
-//		int zlevel = PropertyUtils.getTagInt(osmLevel,MapTemplate.KEY_ZLEVEL,0);
-//		String name = PropertyUtils.getTagString(osmLevel,NAME_KEY);
-//
-//		//create the levle
-//		JSONObject indoorLevel = new JSONObject();
-//		indoorLevel.put("id",id);
-//		indoorLevel.put("z",zlevel);
-//		if(name == null) name = "unnamed";
-//		indoorLevel.put("nm",name);
-//		indoorLevelList.put(indoorLevel);
-//
-//		//create the level geometry
-//		JSONObject levelGeoJson = new JSONObject();
-//		levelGeoJson.put("id",id);
-//		levelGeoJson.put("mid",mapId);
-//		levelGeoJson.put("l","en"); //fix this!!!
-//		levelGeoJson.put("ft","lvlg1");
-//		//version added later
-//
-//		//add the geometry
-//		ArrayList<JSONObject> featureList = new ArrayList<JSONObject>();
-//
-//		JSONArray members = osmLevel.getJSONArray(MEMBERS_KEY);
-//
-//		//get nodes and ways
-//		int cnt = members.length();
-//		for(int i = 0; i < cnt; i++) {
-//			addFeatureGeoJson(members.getJSONObject(i),featureList);
-//		}
-//
-//		//process the multipolygons
-//		for(OsmMultipoly mpr:multipolygons) {
-//			addMultipolyFeatureGeoJson(mpr,featureList);
-//		}
-//
-//		//sort the geometry by zindex
-//		Collections.sort(featureList,new JsonIntFieldComparator("zorder",DEFAULT_ZLEVEL_FOR_SORT));
-//
-//		levelGeoJson.put("type","FeatureCollection");
-//		JSONArray featureJsonArray = new JSONArray();
-//		levelGeoJson.put("features",featureJsonArray);
-//		for(JSONObject f:featureList) {
-//			featureJsonArray.put(f);
-//		}
-//
-//		levelGeomObjects.add(levelGeoJson);
-//
-//	}
+	
+	@Override
+	public int compareTo(OsmLevel level) {
+		//return negative is this level is less that passed level.
+		return this.zlevel - level.zlevel; 
+	}
+	
+	/** This method gets the array of features, ordered by draw order. */
+	private ArrayList<OsmFeature> getOrderedFeatureList() {
+		ArrayList<OsmFeature> featureList = new ArrayList();
+		featureList.addAll(this.features);
+		Collections.sort(featureList);
+		return featureList;
+	}	
 	
 }

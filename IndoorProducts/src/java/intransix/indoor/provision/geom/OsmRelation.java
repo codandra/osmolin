@@ -64,6 +64,7 @@ public abstract class OsmRelation extends OsmObject {
 			String role = member.optString(ROLE_KEY,null);
 			if(role == null) continue;
 			
+			loadMember(memberId,type,role,mapTemplate,mapProvision);
 		}
 	}
 	

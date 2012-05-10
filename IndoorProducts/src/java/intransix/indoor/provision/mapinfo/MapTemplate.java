@@ -30,6 +30,10 @@ public class MapTemplate extends TypeBaseInfo {
 	public String KEY_REF_SCOPE_GEOM = "ref:scope:geom";
 	public String KEY_REF_SCOPE_REL = "ref:scope:rel";
 	
+	public int RADIANS_PRECISION = 2;
+	public int TRANSFORM_PRECISION = 7;
+	public int COORDINATE_PRECISION = 3;
+	
 	private String name;
 	private int version;
 	private ArrayList<NamespaceInfo> namespaces = new ArrayList<NamespaceInfo>();
@@ -64,6 +68,11 @@ public class MapTemplate extends TypeBaseInfo {
 			mfi.KEY_REF_SCOPE_GEOM = nameDefs.optString("refScopeGeomKey",mfi.KEY_REF_SCOPE_GEOM);
 			mfi.KEY_REF_SCOPE_REL = nameDefs.optString("refScopeRelKey",mfi.KEY_REF_SCOPE_REL);
 		}
+		
+		//read the output precision values
+		mfi.RADIANS_PRECISION = json.optInt("radianPrecision",mfi.RADIANS_PRECISION);
+		mfi.TRANSFORM_PRECISION = json.optInt("transformPrecision",mfi.TRANSFORM_PRECISION);
+		mfi.COORDINATE_PRECISION = json.optInt("coordinatePrecision",mfi.COORDINATE_PRECISION);
 		
 		//load namespaces
 		JSONArray ns = json.getJSONArray("namespace");
