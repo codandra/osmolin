@@ -94,11 +94,18 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 		levelGeoJson.put("v",map.getVersion());
 		levelGeoJson.put("l","en"); //fix this!!!
 		levelGeoJson.put("ft","lvlg1");
+		levelGeoJson.put("type","FeatureCollection");
 
 		//add the geometry
 		ArrayList<OsmFeature> featureList = getOrderedFeatureList();
 		JSONArray featureJsonArray = new JSONArray();
 		AffineTransform lonlatToXY = map.getLonLatToXY();
+		if(shell != null) {
+			JSONObject shellJson = shell.getJsonObject(mapTemplate,lonlatToXY);
+			if(shellJson != null) {
+				featureJsonArray.put(shellJson);
+			}
+		}
 		for(OsmFeature feature:featureList) {
 			JSONObject featureJson = feature.getJsonObject(mapTemplate,lonlatToXY);
 			if(featureJson != null) {
@@ -124,6 +131,9 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 			}
 			else {
 				this.shell = null;
+			}
+			if(shell != null) {
+				shell.setFeatureTypeInfo(mapTemplate.getShellFeatureType());
 			}
 		}
 		else if(role.equalsIgnoreCase(mapTemplate.ROLE_FEATURE)) {

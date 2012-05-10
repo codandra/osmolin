@@ -61,7 +61,7 @@ public class MapProvision {
 			map.finalizeMap();
 		}
 
-if(true) throw new Exception("Test finished");
+//if(true) throw new Exception("Test finished");
 
 		//lookup version fo outgoing data
 		FileAccess fileAccess = dataLoader.getFileAccess();
