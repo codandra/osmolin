@@ -31,7 +31,6 @@ public class MapTemplate extends TypeBaseInfo {
 	public String KEY_REF_SCOPE_REL = "ref:scope:rel";
 	
 	public int RADIANS_PRECISION = 2;
-	public int TRANSFORM_PRECISION = 7;
 	public int COORDINATE_PRECISION = 3;
 	
 	private String name;
@@ -71,7 +70,6 @@ public class MapTemplate extends TypeBaseInfo {
 		
 		//read the output precision values
 		mfi.RADIANS_PRECISION = json.optInt("radianPrecision",mfi.RADIANS_PRECISION);
-		mfi.TRANSFORM_PRECISION = json.optInt("transformPrecision",mfi.TRANSFORM_PRECISION);
 		mfi.COORDINATE_PRECISION = json.optInt("coordinatePrecision",mfi.COORDINATE_PRECISION);
 		
 		//load namespaces
