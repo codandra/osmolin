@@ -105,6 +105,7 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 				featureJsonArray.put(featureJson);
 			}
 		}
+		levelGeoJson.put("features", featureJsonArray);
 		
 		return levelGeoJson;
 	}

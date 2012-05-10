@@ -249,7 +249,7 @@ public class OsmMap extends OsmRelation {
 		
 		mapObject.put("nm",name);
 
-		mapObject.put("t",getTransformJson(mapTemplate.TRANSFORM_PRECISION));
+		mapObject.put("t",getTransformJson());
 
 		mapObject.put("ar",new FormattedDecimal(this.defaultAngleRad,mapTemplate.RADIANS_PRECISION));
 		mapObject.put("h",(int)height);
@@ -271,13 +271,14 @@ public class OsmMap extends OsmRelation {
 	}
 
 	/** This method creates the transform json. */
-	private JSONArray getTransformJson(int precision) throws Exception {
+	private JSONArray getTransformJson() throws Exception {
 		double[] matrix = new double[6];
 		AffineTransform xyToLatlon = lonlatToXY.createInverse();
 		xyToLatlon.getMatrix(matrix);
 		JSONArray json = new JSONArray();
 		for(int i = 0; i < 6; i++) {
-			json.put(new FormattedDecimal(matrix[i],precision));
+			//use double, not fixed, since we don't know the scale
+			json.put(matrix[i]);
 		}
 		return json;
 	}
