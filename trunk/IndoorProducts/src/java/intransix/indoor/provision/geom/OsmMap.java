@@ -5,6 +5,7 @@ import intransix.indoor.provision.MapProvision;
 import intransix.indoor.provision.mapinfo.MapTemplate;
 import intransix.indoor.provision.mapinfo.FeatureTypeInfo;
 import intransix.indoor.geom.*;
+import intransix.indoor.util.FormattedDecimal;
 import org.json.*;
 
 /**
@@ -44,6 +45,14 @@ public class OsmMap extends OsmRelation {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+	
+	public int getVersion() {
+		return version;
+	}
+	
+	public AffineTransform getLonLatToXY() {
+		return lonlatToXY;
 	}
 
 	public void addNamespaceName(String name) {
@@ -101,10 +110,6 @@ public class OsmMap extends OsmRelation {
 				this.levels.add(level);
 			}
 		}
-	}
-
-	public JSONObject getMapJson() {
-		return null;
 	}
 
 	/** This method calculates the local coordinate system for the map. */
@@ -233,67 +238,65 @@ public class OsmMap extends OsmRelation {
 //			if(maxY < y) maxY = y;
 //		}
 	}
+	
+	/** This method creates the map object. */
+	public JSONObject getMapJson(MapTemplate mapTemplate) throws Exception {
+		JSONObject mapObject = new JSONObject();
+		mapObject.put("id",getId());
+		mapObject.put("v",version);
+		mapObject.put("l","en"); //fix this!!!
+		mapObject.put("ft","map1");
+		
+		mapObject.put("nm",name);
+
+		mapObject.put("t",getTransformJson(mapTemplate.TRANSFORM_PRECISION));
+
+		mapObject.put("ar",new FormattedDecimal(this.defaultAngleRad,mapTemplate.RADIANS_PRECISION));
+		mapObject.put("h",(int)height);
+		mapObject.put("w",(int)width);
+		
+		mapObject.put("ns",getActiveNamespaceList());
+
+		JSONArray levelJsonArray = new JSONArray();
+		ArrayList<OsmLevel> orderedLevelList = getOrderedLevelList();
+		for(OsmLevel level:orderedLevelList) {
+			JSONObject levelEntry = level.getMapJsonEntry(mapTemplate);
+			if(levelEntry != null) {
+				levelJsonArray.put(levelEntry);
+			}
+		} 
+		mapObject.put("lvl",levelJsonArray);
+
+		return mapObject;
+	}
+
+	/** This method creates the transform json. */
+	private JSONArray getTransformJson(int precision) throws Exception {
+		double[] matrix = new double[6];
+		AffineTransform xyToLatlon = lonlatToXY.createInverse();
+		xyToLatlon.getMatrix(matrix);
+		JSONArray json = new JSONArray();
+		for(int i = 0; i < 6; i++) {
+			json.put(new FormattedDecimal(matrix[i],precision));
+		}
+		return json;
+	}
 
 
-//	/** This method creates the map object. */
-//	private JSONObject createMapObject() throws Exception {
-//		mapId = osmMapObject.getLong(ID_KEY);
-//		String name = PropertyUtils.getTagString(osmMapObject,NAME_KEY);
-//		JSONObject mapObject = new JSONObject();
-//		mapObject.put("id",mapId);
-//		mapObject.put("l","en"); //fix this!!!
-//		mapObject.put("ft","map1");
-//		mapObject.put("nm",name);
-//
-//		mapObject.put("t",getTransformJson());
-//
-//		mapObject.put("ar",new FormattedDecimal(angleRad,RADIANS_PRECISION));
-//		mapObject.put("h",(int)height);
-//		mapObject.put("w",(int)width);
-//
-//		//version and map feature namespace list added later
-//
-//		return mapObject;
-//	}
-//
-//
-//
-//	/** This method creates the transform json. */
-//	private JSONArray getTransformJson() throws Exception {
-//		double[] matrix = new double[6];
-//		AffineTransform xyToLatlon = lonlatToXY.createInverse();
-//		xyToLatlon.getMatrix(matrix);
-//		JSONArray json = new JSONArray();
-//		for(int i = 0; i < 6; i++) {
-//			json.put(new FormattedDecimal(matrix[i],TRANSFORM_PRECISION));
-//		}
-//		return json;
-//	}
-
-
-//		/** This method gets a list of the map feature namespaces used in the map. */
-//	private JSONArray getActiveNamespaceList() {
-//		JSONArray namespaceList = new JSONArray();
-//		for(String namespaceName:activeNamespaces) {
-//			namespaceList.put(namespaceName);
-//		}
-//		return namespaceList;
-//	}
-
-//	private class JsonIntFieldComparator implements Comparator<JSONObject> {
-//		private String compareField;
-//		private int defaultValue;
-//
-//		public JsonIntFieldComparator(String compareField, int defaultValue) {
-//			this.compareField = compareField;
-//			this.defaultValue = defaultValue;
-//		}
-//
-//		@Override
-//		public int compare(JSONObject a, JSONObject b) {
-//			int aval = a.optInt(compareField,defaultValue);
-//			int bval = b.optInt(compareField,defaultValue);
-//			return Integer.compare(aval, bval);
-//		}
-//	}
+		/** This method gets a list of the map feature namespaces used in the map. */
+	private JSONArray getActiveNamespaceList() {
+		JSONArray namespaceList = new JSONArray();
+		for(String namespaceName:activeNamespaces) {
+			namespaceList.put(namespaceName);
+		}
+		return namespaceList;
+	}
+	
+	/** This method gets a list of the levels, ordered by zlevel. */
+	private ArrayList<OsmLevel> getOrderedLevelList() {
+		ArrayList<OsmLevel> levelList = new ArrayList();
+		levelList.addAll(this.levels);
+		Collections.sort(levelList);
+		return levelList;
+	}
 }

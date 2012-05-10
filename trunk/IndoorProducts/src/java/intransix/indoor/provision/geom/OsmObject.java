@@ -78,10 +78,10 @@ public class OsmObject {
 		if(type.equalsIgnoreCase(NODE_TYPE)) {
 			OsmNode.loadOsmNode(id,json,mapTemplate,mapProvision);
 		}
-		else if(type.equalsIgnoreCase(NODE_TYPE)) {
+		else if(type.equalsIgnoreCase(WAY_TYPE)) {
 			OsmWay.loadOsmWay(id,json,mapTemplate,mapProvision);
 		}
-		else if(type.equalsIgnoreCase(NODE_TYPE)) {
+		else if(type.equalsIgnoreCase(RELATION_TYPE)) {
 			OsmRelation.loadOsmRelation(id,json,mapTemplate,mapProvision);
 		}
 	}

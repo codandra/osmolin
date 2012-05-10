@@ -1,8 +1,10 @@
 package intransix.indoor.provision.geom;
 
 import intransix.indoor.provision.MapProvision;
-import intransix.indoor.provision.mapinfo.FeatureTypeInfo;
 import intransix.indoor.provision.mapinfo.MapTemplate;
+import intransix.indoor.geom.*;
+import intransix.indoor.util.FormattedDecimal;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -44,7 +46,7 @@ public class OsmNode extends OsmFeature {
 		node.lat = json.optDouble(LAT_KEY,INVALID_ANGLE);
 		if(node.lat == INVALID_ANGLE) return;
 		
-		node.lon = json.optDouble(LAT_KEY,INVALID_ANGLE);
+		node.lon = json.optDouble(LON_KEY,INVALID_ANGLE);
 		if(node.lon == INVALID_ANGLE) return;
 		
 		//try to read the zlevel
@@ -54,18 +56,40 @@ public class OsmNode extends OsmFeature {
 		//load feature properties
 		boolean success = node.loadFeatureProperties(json,mapTemplate);
 		
-		//set geom type - either point or none
-		if((node.fti != null)&&(node.fti.getIsPointAllowed())) {
-			node.geomType = FeatureTypeInfo.GEOM_TYPE_POINT;
-		}
-		else {
-			node.geomType = FeatureTypeInfo.GEOM_TYPE_NONE;
-		}
-		
 		//flag loading completed
 		if(success) { 
 			node.loaded = true;
 		}
 			
 	}
+	
+	//========================
+	// protected methods
+	//========================
+	
+	@Override
+	protected JSONObject getGeometryJson(MapTemplate mapTemplate, AffineTransform lonlatToXY) throws Exception {
+		JSONObject geomJson = new JSONObject();
+		geomJson.put("type","Point");
+		JSONArray coords = getJsonPoint(lonlatToXY,mapTemplate.COORDINATE_PRECISION);
+		geomJson.put("coordinates",coords);
+		
+		return geomJson;
+	}
+	
+	//========================
+	// package methods
+	//========================
+	
+	/** This method creates a json point in the format [x,y]. The number of decimal points
+	 * should be specified with precision. */
+	JSONArray getJsonPoint(AffineTransform lonlatToXY, int precision) throws Exception {
+		Point2D point = new Point2D.Double(lon,lat);
+		lonlatToXY.transform(point, point);
+		JSONArray pointJson = new JSONArray();
+		pointJson.put(new FormattedDecimal(point.getX(),precision));
+		pointJson.put(new FormattedDecimal(point.getY(),precision));
+		return pointJson;
+	}
+
 }
