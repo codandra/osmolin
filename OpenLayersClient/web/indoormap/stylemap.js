@@ -28,44 +28,39 @@ function getStyleMap() {
 	defaultStyle.addRules([rule_basic, rule_label]);
 	
 	var styles = new OpenLayers.StyleMap(defaultStyle);
-	styles.addUniqueValueRules("default", "type", {
-		"app:background": {
-			"strokeColor": "#000000", 
-			"strokeWidth": 2, 
-			"fillColor":"#eeeeee"
-		},
-		"buildingpart:room": {
+	styles.addUniqueValueRules("default", "buildingpart", {
+		"room": {
 			"strokeColor": "#222222", 
 			"strokeWidth": 2, 
 			"fillColor":"#ff8080"			
 		},
-//		"buildingpart:bathroom": {
-//			"strokeColor": "#222222", 
-//			"strokeWidth": 2, 
-//			"fillColor":"#00ff00"
-//		},
-		"buildingpart:bathroom": {
-			"externalGraphic":"res/bathroom.png"			
+		"bathroom": {
+			"strokeColor": "#222222", 
+			"strokeWidth": 2, 
+			"fillColor":"#00ff00",
+			"externalGraphic":"res/bathroom.png"
 		},
-		"buildingpart:escalator": {
-			"externalGraphic":"res/escalator.png"
-		},
-		"buildingpart:kiosk": {
+		"kiosk": {
 			"strokeColor": "#444444", 
 			"strokeWidth": 2, 
 			"fillColor":"#ffc0c0"
 		},
-		"buildingpart:corridor": {
+		"corridor": {
 			"strokeColor": "#666666", 
 			"strokeWidth": 2, 
 			"fillColor":"#ffc0c0"
 		},
-		"buildingpart:unit": {
+		"unit": {
 			"strokeColor": "#888888", 
 			"strokeWidth": 2, 
 			"fillColor":"#e0ffc0"
 		},
-		"buildingpart:stairs":{
+		"hall":{
+			"strokeColor": "#888888", 
+			"strokeWidth": 2, 
+			"fillColor":"#e0ffc0"
+		},
+		"stairs":{
 			"strokeColor": "#888888", 
 			"strokeWidth": 2, 
 			"fillColor":"#e0ffc0",
@@ -73,12 +68,39 @@ function getStyleMap() {
 			"graphicOpacity":.5			
 			
 		},
-		"buildingpart:hall":{
+		"escalator": {
+			"externalGraphic":"res/escalator.png"
+		},
+		"elevator":{
 			"strokeColor": "#888888", 
 			"strokeWidth": 2, 
-			"fillColor":"#e0ffc0"
+			"fillColor":"#e0ffc0",
+			"externalGraphic":"res/elevator.png"	
+		}		
+	});
+	styles.addUniqueValueRules("default", "buildingpart:verticalpassage", {
+		"stairway":{
+			"strokeColor": "#888888", 
+			"strokeWidth": 2, 
+			"fillColor":"#e0ffc0",
+			"externalGraphic":"res/stairs.png"			
+		},
+		"elevator":{
+			"strokeColor": "#888888", 
+			"strokeWidth": 2, 
+			"fillColor":"#e0ffc0",
+			"externalGraphic":"res/elevator.png"	
+		},
+		"escalator": {
+			"externalGraphic":"res/escalator.png"
 		}
-					
+	});
+	styles.addUniqueValueRules("default", "shell", {
+		"yes": {
+			"strokeColor": "#000000", 
+			"strokeWidth": 2, 
+			"fillColor":"#eeeeee"
+		}		
 				
 	});
 

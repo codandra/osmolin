@@ -1,29 +1,41 @@
+indoor = {};
 
-indoor.IndoorMap = function(elementId,styleMap) {
+indoor.HOST_URL = "http://localhost:8080/mapdata";
+
+indoor.getMapUrl = function(mapId) {
+	return indoor.HOST_URL + "/file/indoormap/" + mapId;
+}
+
+indoor.getLevelUrl = function(levelId) {
+	return indoor.HOST_URL + "/file/lvlgeom/" + levelId;
+}
+
+indoor.BasicMap = function(elementId,styleMap) {
 	//create map
 	this.mapElementId = elementId;
+	this.styleMap = styleMap;
+	
 	this.map = null;
-	
-	//load style map base
-//	this.defaultStyle = new Openlayers.Style();
-//	this.styleMap = new OpenLayers.StyleMap(this.defaultStyle);
-this.styleMap = styleMap;
-	
 	this.selectControl = null;
 	this.popup = null;
 	
 	this.currentMap = null;
 }
 
-indoor.IndoorMap.prototype.openMap = function(mapId) {
+indoor.BasicMap.prototype.openMap = function(mapId) {
 	var indoorMap = this;
-	var onDownload = function(mapData) {
-		indoorMap.mapLoaded(mapData);
+	var onDownload = function(response) {
+		var data = eval('(' + response.responseText + ')');
+		indoorMap.mapLoaded(data);
 	}
-	indoor.Request.loadMap(mapId,onDownload);
+	OpenLayers.Request.GET({
+		url:indoor.getMapUrl(mapId),
+		success:onDownload,
+		failure:indoor.failedRequest
+	})
 }
 
-indoor.IndoorMap.prototype.mapLoaded = function(mapData) {
+indoor.BasicMap.prototype.mapLoaded = function(mapData) {
 	if(mapData != null) {
 		this.map = new OpenLayers.Map({
 			"div": this.mapElementId,
@@ -31,11 +43,6 @@ indoor.IndoorMap.prototype.mapLoaded = function(mapData) {
 		});
 		
 		this.mapData = mapData;
-		
-		//load style map
-//		this.loadTheme(mapData.ns);
-
-var indoorMap = this;
 		
 		//load levels
 		var levels = mapData.lvl;
@@ -46,7 +53,7 @@ var indoorMap = this;
 				var layer = new OpenLayers.Layer.Vector(level.nm, {
                     "strategies": [new OpenLayers.Strategy.Fixed()],                
                     "protocol": new OpenLayers.Protocol.HTTP({
-                        "url": indoor.Request.getLevelUrl(level.id),
+                        "url": indoor.getLevelUrl(level.id),
                         "format": new OpenLayers.Format.GeoJSON()
                     }),
 					"styleMap": this.styleMap,
@@ -67,19 +74,7 @@ var indoorMap = this;
 	}
 }
 
-//FIX THEMES!!!
-indoor.IndoorMap.prototype.loadTheme = function(namespaces) {
-	var indoorMap = this;
-	var onDownload = function(theme) {
-		indoorMap.themeLoaded(theme);
-	}
-	for(var i = 0; i < namespaces.length; i++) {
-		indoor.Request.loadMap(namespaces[i],onDownload);
-	}
-}
 
-indoor.IndoorMap.prototype.themeLoaded = function(theme) {
-}
 
 //code for addign selection
 //				layer.events.on({

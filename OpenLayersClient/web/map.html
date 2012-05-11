@@ -2,22 +2,36 @@
 	<head>
 		<title></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<script src="indoormap/indoor.js"></script>
-		<script src="indoormap/indoormap.js"></script>
-		<script src="indoormap/basestylemap.js"></script>
-		<script src="indoormap/request.js"></script>
+		<script src="indoormap/basicmap.js"></script>
+		<script src="indoormap/stylemap.js"></script>
 		<script src="http://openlayers.org/api/OpenLayers.js"></script>
 		<script type="text/javascript">
             var indoorMap;
             function init() {
 				
 				var styleMap = getStyleMap();
-				indoorMap = new indoor.IndoorMap("map",styleMap);
+				indoorMap = new indoor.BasicMap("map",styleMap);
 				
+				var mapId = getQueryParam("mapid");
+				if(!mapId) mapId = 2127658
+				//if(!mapId) mapId = 1370729
 
-				indoorMap.openMap(2127658);
-				//indoorMap.openMap(1370729);
-				
+				indoorMap.openMap(mapId);	
+			}
+			
+			function getQueryParam(key) {
+				var query = location.search;
+				if(query.length > 1) {
+					//get rid of '?'
+					query = query.substr(1);
+				}
+				var pairs = query.split('&');
+				for(var i = 0; i < pairs.length; i++) {
+					var pairString = pairs[i];
+					var pairArray = pairString.split('=');
+					if((pairArray.length == 2)&&(pairArray[0] = key)) return pairArray[1];
+				}
+				return null;
 			}
 		</script>
 	</head>
