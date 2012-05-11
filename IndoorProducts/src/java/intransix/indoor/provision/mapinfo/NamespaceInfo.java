@@ -24,8 +24,16 @@ public class NamespaceInfo extends TypeBaseInfo {
 	 * @throws Exception 
 	 */
 	public static NamespaceInfo getNamespaceInfo(JSONObject json, MapTemplate mt) throws Exception {
+		
 		NamespaceInfo ni = new NamespaceInfo();
-		ni.loadData(json, mt);
+		String name = json.getString("name");
+		ni.setName(name);
+		
+		JSONObject defaultFeatureJson = json.optJSONObject("defaultFeature");
+		if(defaultFeatureJson != null) {
+			ni.loadData(json,mt);
+		}
+
 		ni.version = json.getInt("version");
 		
 		JSONArray ftInfos = json.getJSONArray("mapFeatures");

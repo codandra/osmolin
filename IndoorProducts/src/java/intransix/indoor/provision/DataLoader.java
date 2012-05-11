@@ -99,7 +99,7 @@ public class DataLoader {
 		
 		String url = osmUrl + "?data=" + encodedData;
 		
-url = "http://localhost:8080/IndoorProducts/mgwmall.json";		
+//url = "http://localhost:8080/IndoorProducts/mgwmall.json";		
 		
 		JSONObject result = request(url,null,"GET");
 		

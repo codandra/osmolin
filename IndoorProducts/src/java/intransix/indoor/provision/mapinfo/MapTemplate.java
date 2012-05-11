@@ -46,8 +46,13 @@ public class MapTemplate extends TypeBaseInfo {
 	/** This method loads the map template. */
 	public static MapTemplate getMapTemplate(JSONObject json) throws Exception {
 		MapTemplate mfi = new MapTemplate();
+		String name = json.getString("name");
+		mfi.setName(name);
 		
-		mfi.loadData(json,null);
+		JSONObject defaultFeatureJson = json.optJSONObject("defaultFeature");
+		if(defaultFeatureJson != null) {
+			mfi.loadData(json,null);
+		}
 		
 		mfi.version = json.optInt("version",INVALID_VERSION);
 		

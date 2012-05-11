@@ -1,5 +1,6 @@
 package intransix.indoor.provision.geom;
 
+import java.util.*;
 import intransix.indoor.provision.mapinfo.FeatureTypeInfo;
 import org.json.*;
 import intransix.indoor.provision.mapinfo.MapTemplate;
@@ -12,10 +13,10 @@ import intransix.indoor.geom.*;
  * @author sutter
  */
 public abstract class OsmFeature extends OsmObject implements Comparable<OsmFeature> {
-	JSONObject properties;
-	int zlevel;
-	long zcontext;
-	FeatureTypeInfo fti;
+	private JSONObject properties;
+	private int zlevel;
+	private long zcontext;
+	private FeatureTypeInfo fti;
 	
 	public OsmFeature(long id) {
 		super(id);
@@ -88,16 +89,30 @@ public abstract class OsmFeature extends OsmObject implements Comparable<OsmFeat
 			properties = new JSONObject();
 
 			try {
-				properties.put("type",fti.getTypeName());
+				//add a property for zorder
 				properties.put("zorder",fti.getZorder());
 
-				for(PropertyKey pk:fti.getProperties()) {
-					String val = getTagString(json,pk.osmKey);
-					if(val != null) {
-						if(!pk.replace) {
-							if(properties.has(pk.appKey)) continue;
+//use this code to include only specified properties
+//				for(PropertyKey pk:fti.getProperties()) {
+//					String val = getTagString(json,pk.osmKey);
+//					if(val != null) {
+//						if(!pk.replace) {
+//							if(properties.has(pk.appKey)) continue;
+//						}
+//						properties.put(pk.appKey,val);
+//					}
+//				}
+	
+//use this code for excluding specifying excluded properties
+				JSONObject props = json.optJSONObject(TAGS_KEY);
+				HashSet<String> excludedKeys = fti.getExcludedKeys();
+				if(props != null) {
+					Iterator<String> iter = props.keys();
+					while(iter.hasNext()) {
+						String key = iter.next();
+						if(!excludedKeys.contains(key)) {
+							this.properties.put(key,props.get(key));
 						}
-						properties.put(pk.appKey,val);
 					}
 				}
 			}
@@ -123,5 +138,17 @@ public abstract class OsmFeature extends OsmObject implements Comparable<OsmFeat
 //
 //
 
-
+	//========================
+	// Package Methods
+	//========================
+	
+	/** This method returns the properties. */
+	JSONObject getProperties() {
+		return properties;
+	}
+	
+	/** Sets the property object. Used in a group to update the properties. */
+	void setProperties(JSONObject properties) {
+		this.properties = properties;
+	}
 }

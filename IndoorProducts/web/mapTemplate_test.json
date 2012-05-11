@@ -1,200 +1,227 @@
 {
-"name":"test",
-"version":0,
-"fileType":"mf1",
-"nameDefs":{
-"structureType":"building",
-"parentRole":"parent",
-"levelRole":"level",
-"shellRole":"shell",
-"featureRole":"buildingpart",
-"levelType":"level",
-"zlevelKey":"level",
-"zcontextKey":"zcontext",
-"refKeyKey":"ref:key",
-"refKey":"ref",
-"refScopeGeomKey":"ref:scope:geom",
-"refScopeRelKey":"ref:scope:rel"
-},
-"namespace":[
-{
-"name":"buildingpart",
-"version":0,
-"mapFeatures":[
-{
-"name":"patio",
-"allowedTypes":4,
-"zindex":0
-},
-{
-"name":"bldg_section",
-"allowedTypes":4,
-"defaultPath":2,
-"zindex":1
-},
-{
-"name":"unit",
-"allowedTypes":4,
-"defaultPath":2,
-"zindex":2
-},
-{
-"name":"room",
-"allowedTypes":3,
-"zindex":1
-},
-{
-"name":"bathroom",
-"allowedTypes":6,
-"defaultPath":2,
-"iconInfo":2,
-"zindex":3,
-"properties":[
-{
-"key":"gender"
-}
-]
-},
-{
-"name":"hall",
-"allowedTypes":4,
-"zindex":3
-},
-{
-"name":"corridor",
-"allowedTypes":4,
-"zindex":3
-},
-{
-"name":"opening",
-"allowedTypes":4,
-"zindex":3
-},
-{
-"name":"inaccessible",
-"allowedTypes":4,
-"zindex":3
-},
-{
-"name":"kiosk",
-"allowedTypes":4,
-"zindex":4
-},
-{
-"name":"barrier",
-"allowedTypes":6,
-"defaultPath":2,
-"zindex":4
-},
-{
-"name":"step",
-"allowedTypes":6,
-"defaultPath":1,
-"zindex":1
-},
-{
-"name":"water",
-"allowedTypes":4,
-"zindex":1
-},
-{
-"name":"fountain",
-"allowedTypes":5,
-"zindex":1
-},
-{
-"name":"railing",
-"allowedTypes":6,
-"defaultPath":1,
-"zindex":4
-},
-{
-"name":"greenery",
-"allowedTypes":4,
-"zindex":4
-},
-{
-"name":"plant",
-"allowedTypes":1,
-"zindex":4
-},
-{
-"name":"stage",
-"allowedTypes":4,
-"zindex":4
-},
-{
-"name":"ramp",
-"allowedTypes":5,
-"zindex":4
-},
-{
-"name":"stairs",
-"allowedTypes":6,
-"defaultPath":2,
-"iconInfo":2,
-"zindex":4
-},
-{
-"name":"elevator",
-"allowedTypes":6,
-"defaultPath":2,
-"iconInfo":2,
-"zindex":4
-},
-{
-"name":"escalator",
-"allowedTypes":6,
-"defaultPath":2,
-"iconInfo":2,
-"zindex":4,
-"properties":[
-{
-"key":"direction"
-}
-]
-},
-{
-"name":"doorpath",
-"allowedTypes":2,
-"zindex":4
-},
-{
-"name":"wall",
-"allowedTypes":6,
-"defaultPath":1,
-"zindex":4
-},
-{
-"name":"window",
-"allowedTypes":6,
-"defaultPath":1,
-"iconInfo":1,
-"zindex":5
-},
-{
-"name":"door",
-"allowedTypes":6,
-"defaultPath":1,
-"iconInfo":1,
-"zindex":5
-},
-{
-"name":"object",
-"allowedTypes":7,
-"defaultPath":2,
-"zindex":4
-}
-]
-}
-],
-"properties":[
-{"key":"name"}
-],
-"shell":{
-"name":"background",
-"allowedTypes":4,
-"defaultPath":2,
-"zindex":-1
-}
+    "name": "test",
+    "version": 0,
+    "fileType": "mf1",
+    "nameDefs": {
+        "structureType": "building",
+        "parentRole": "parent",
+        "levelRole": "level",
+        "shellRole": "shell",
+        "featureRole": "buildingpart",
+        "levelType": "level",
+        "zlevelKey": "level",
+        "zcontextKey": "zcontext",
+        "refKeyKey": "ref:key",
+        "refKey": "ref",
+        "refScopeGeomKey": "ref:scope:geom",
+        "refScopeRelKey": "ref:scope:rel"
+    },
+    "namespace": [
+        {
+            "name": "buildingpart",
+            "version": 0,
+            "mapFeatures": [
+                {
+                    "name": "patio",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 0
+                },
+                {
+                    "name": "bldg_section",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 1
+                },
+                {
+                    "name": "unit",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 2
+                },
+                {
+                    "name": "room",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 1
+                },
+                {
+                    "name": "bathroom",
+                    "allowedTypes": 6,
+                    "defaultPath": 2,
+                    "zorder": 3,
+                    "properties": [
+                        {
+                            "key": "gender"
+                        }
+                    ]
+                },
+                {
+                    "name": "hall",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 3
+                },
+                {
+                    "name": "corridor",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 3
+                },
+                {
+                    "name": "opening",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 3
+                },
+                {
+                    "name": "inaccessible",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 3
+                },
+                {
+                    "name": "kiosk",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "barrier",
+                    "allowedTypes": 6,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "step",
+                    "allowedTypes": 6,
+                    "defaultPath": 1,
+                    "zorder": 1
+                },
+                {
+                    "name": "water",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 1
+                },
+                {
+                    "name": "fountain",
+                    "allowedTypes": 5,
+                    "defaultPath": 2,
+                    "zorder": 1
+                },
+                {
+                    "name": "railing",
+                    "allowedTypes": 6,
+                    "defaultPath": 1,
+                    "zorder": 4
+                },
+                {
+                    "name": "greenery",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "plant",
+                    "allowedTypes": 1,
+                    "defaultPath": 0,
+                    "zorder": 4
+                },
+                {
+                    "name": "stage",
+                    "allowedTypes": 4,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "ramp",
+                    "allowedTypes": 5,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "stairs",
+                    "allowedTypes": 6,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "elevator",
+                    "allowedTypes": 6,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "escalator",
+                    "allowedTypes": 6,
+                    "defaultPath": 2,
+                    "zorder": 4,
+                    "properties": [
+                        {
+                            "key": "direction"
+                        }
+                    ]
+                },
+				{
+                    "name": "verticalpassage",
+                    "allowedTypes": 6,
+                    "defaultPath": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "doorpath",
+                    "allowedTypes": 2,
+                    "zorder": 4
+                },
+                {
+                    "name": "wall",
+                    "allowedTypes": 6,
+                    "defaultPath": 1,
+                    "zorder": 4
+                },
+                {
+                    "name": "window",
+                    "allowedTypes": 6,
+                    "defaultPath": 1,
+                    "zorder": 5
+                },
+                {
+                    "name": "door",
+                    "allowedTypes": 6,
+                    "defaultPath": 1,
+                    "zorder": 5
+                },
+                {
+                    "name": "object",
+                    "allowedTypes": 7,
+                    "defaultPath": 2,
+                    "zorder": 4
+                }
+            ]
+        }
+    ],
+    "defaultFeature": {
+        "name": "default",
+        "allowedTypes": 7,
+        "defaultPath": 2,
+        "zorder": 4,
+        "properties": [
+            {
+                "key": "name"
+            }
+        ],
+        "excluded": [
+            "area",
+            "level",
+            "zlevel",
+            "zcontext"
+        ]
+    },
+    "shell": {
+        "name": "shell",
+        "allowedTypes": 4,
+        "defaultPath": 2,
+        "zorder": -1
+    }
 }

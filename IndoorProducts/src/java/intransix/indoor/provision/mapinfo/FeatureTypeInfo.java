@@ -12,7 +12,6 @@ public class FeatureTypeInfo extends TypeBaseInfo {
 	
 	private final static String AREA_KEY = "area";
 	
-	private String typeName;
 	private String namespaceName;
 	
 	//============================================
@@ -29,9 +28,11 @@ public class FeatureTypeInfo extends TypeBaseInfo {
 	 */
 	public static FeatureTypeInfo getGeomInfo(JSONObject json,
 			TypeBaseInfo parent, String namespaceName) throws Exception {
+		
 		FeatureTypeInfo fti = new FeatureTypeInfo();
+		String name = json.getString("name");
+		fti.setName(name);
 		fti.loadData(json,parent);
-		fti.typeName = namespaceName + ":" + json.optString("outName",fti.getName());
 		fti.namespaceName = namespaceName;
 		
 		return fti;
@@ -58,10 +59,6 @@ public class FeatureTypeInfo extends TypeBaseInfo {
 	
 	public boolean getIsPointAllowed() {
 		return ((this.getAllowedTypes() | FeatureTypeInfo.ALLOWED_TYPE_POINT) != 0);
-	}
-	
-	public String getTypeName() {
-		return typeName;
 	}
 	
 	public String getNamespaceName() {

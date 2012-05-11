@@ -23,14 +23,14 @@ public class OsmMap extends OsmRelation {
 	private final static double EARTH_CIRCUMFERENCE = 40040000.0; //somewhere between polar and equitorial value - I picked it at random though
 	private final static double METERS_PER_DEGREE = EARTH_CIRCUMFERENCE / 360.0;
 	
-	String name;
-	int version;
-	HashSet<OsmLevel> levels = new HashSet<OsmLevel>();
-	double width;
-	double height;
-	double defaultAngleRad;
-	AffineTransform lonlatToXY;
-	OsmFeature parent;
+	private String name;
+	private int version;
+	private HashSet<OsmLevel> levels = new HashSet<OsmLevel>();
+	private double width;
+	private double height;
+	private double defaultAngleRad;
+	private AffineTransform lonlatToXY;
+	private OsmFeature parent;
 
 	private String mapTemplateName;
 	private HashSet<String> activeNamespaces = new HashSet<String>();
@@ -81,7 +81,7 @@ public class OsmMap extends OsmRelation {
 		map.loadMembers(json,mapTemplate,mapProvision);
 		
 		//flag as loaded
-		map.loaded = true;
+		map.setIsLoaded(true);
 		
 	}
 
@@ -102,7 +102,7 @@ public class OsmMap extends OsmRelation {
 				this.parent = null;
 			}
 		}
-		else if(role.equalsIgnoreCase(mapTemplate.ROLE_LEVEL)) {
+		else if((role.equalsIgnoreCase(mapTemplate.ROLE_LEVEL))||(role.startsWith(mapTemplate.ROLE_LEVEL))) {
 			//add the level
 			OsmLevel level = mapProvision.getOsmLevel(memberId);
 			if(level != null) {
@@ -255,6 +255,7 @@ public class OsmMap extends OsmRelation {
 		mapObject.put("h",(int)height);
 		mapObject.put("w",(int)width);
 		
+		mapObject.put("mt",mapTemplate.getName());
 		mapObject.put("ns",getActiveNamespaceList());
 
 		JSONArray levelJsonArray = new JSONArray();
