@@ -117,6 +117,17 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 		return levelGeoJson;
 	}
 	
+	/** This compare method orders the level by zlevel. */
+	@Override
+	public int compareTo(OsmLevel level) {
+		//return negative is this level is less that passed level.
+		return this.zlevel - level.zlevel; 
+	}
+	
+	//======================
+	// Protected Members
+	//======================
+	
 	@Override
 	protected void loadMember(long memberId, String type, String role,
 			MapTemplate mapTemplate, MapProvision mapProvision) {
@@ -158,11 +169,9 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 		}
 	}
 	
-	@Override
-	public int compareTo(OsmLevel level) {
-		//return negative is this level is less that passed level.
-		return this.zlevel - level.zlevel; 
-	}
+	//======================
+	// Private Members
+	//======================
 	
 	/** This method gets the array of features, ordered by draw order. */
 	private ArrayList<OsmFeature> getOrderedFeatureList() {

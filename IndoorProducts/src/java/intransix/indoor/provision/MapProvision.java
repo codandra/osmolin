@@ -56,7 +56,12 @@ public class MapProvision {
 		//this is only needed if the level relation did not include the features on the level
 		populateLevels();
 		
-		//create the transforms
+		//process the multipolygons
+		for(OsmMultipoly poly:polyMap.values()) {
+			poly.finalizePoly();
+		}
+		
+		//do any final map processing
 		for(OsmMap map:mapMap.values()) {
 			map.finalizeMap();
 		}
