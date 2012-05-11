@@ -45,8 +45,8 @@ public class OsmObject {
 	//========================
 	// Properties
 	//========================
-	long id;
-	boolean loaded = false;
+	private long id;
+	private boolean loaded = false;
 	
 	//========================
 	// Public Methods
@@ -119,6 +119,18 @@ public class OsmObject {
 		}
 		//if we get here, no understood value found
 		return defaultValue;
+	}
+	
+	//==================
+	// Package Methods
+	//===================
+	void setIsLoaded(boolean loaded) {
+		this.loaded = loaded;
+	}
+	
+	/** Set the ID. Used to override the id for members of a group. */
+	void setId(long id) {
+		this.id = id;
 	}
 	
 }

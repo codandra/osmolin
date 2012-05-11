@@ -19,12 +19,12 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 	
 	public final static int INVALID_ZLEVEL = Integer.MIN_VALUE;
 	
-	String name;
-	int version;
-	OsmMap map = null;
-	int zlevel = INVALID_ZLEVEL;
-	OsmFeature shell;
-	HashSet<OsmFeature> features = new HashSet<OsmFeature>();
+	private String name;
+	private int version;
+	private OsmMap map = null;
+	private int zlevel = INVALID_ZLEVEL;
+	private OsmFeature shell;
+	private HashSet<OsmFeature> features = new HashSet<OsmFeature>();
 	
 	public OsmLevel(long id) {
 		super(id);
@@ -75,7 +75,7 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 		level.loadMembers(json, mapTemplate, mapProvision);
 		
 		//flag as loaded
-		level.loaded = true;
+		level.setIsLoaded(true);
 	}
 	
 	public JSONObject getMapJsonEntry(MapTemplate mapTemplate) throws Exception {
@@ -144,7 +144,18 @@ public class OsmLevel extends OsmRelation implements Comparable<OsmLevel> {
 				this.shell = null;
 			}
 			if(shell != null) {
+				//update the feature type info
 				shell.setFeatureTypeInfo(mapTemplate.getShellFeatureType());
+				
+				//set the properties to empty but with "shell":"yes"
+				JSONObject properties = new JSONObject();
+				try {
+					properties.put("shell","yes");
+				}
+				catch(Exception ex) {
+					//not much we can do here...
+				}
+				shell.setProperties(properties);
 			}
 		}
 		else if(role.equalsIgnoreCase(mapTemplate.ROLE_FEATURE)) {

@@ -37,7 +37,7 @@ public class OsmWay extends OsmFeature {
 		OsmWay way = mapProvision.getOsmWay(id);
 		
 		//this shouldn't happen. if it does, keep the existing data
-		if(way.loaded) return;
+		if(way.getIsLoaded()) return;
 		
 		//lookup nodes
 		JSONArray wayNodes = json.optJSONArray(WAY_NODES_KEY);
@@ -83,7 +83,7 @@ public class OsmWay extends OsmFeature {
 		
 		//floag loading completed
 		if(success) { 
-			way.loaded = true;
+			way.setIsLoaded(true);
 		}
 		
 	}
@@ -99,7 +99,7 @@ public class OsmWay extends OsmFeature {
 		if(insideWay.nodes.isEmpty()) return false;
 		
 		//make sure they are on the same level
-		if((insideWay.zlevel != this.zlevel)||(insideWay.zcontext != this.zcontext)) {
+		if((insideWay.getZlevel() != this.getZlevel())||(insideWay.getZcontext() != this.getZcontext())) {
 			return false;
 		}
 		
@@ -128,6 +128,7 @@ public class OsmWay extends OsmFeature {
 		}
 		
 		//the object must have a type
+		FeatureTypeInfo fti = this.getFeatureTypeInfo();
 		if(fti == null) return null;
 		
 		//load geom type
@@ -160,11 +161,6 @@ public class OsmWay extends OsmFeature {
 	//========================
 	// Package Methods
 	//========================
-	
-	/** This method returns the properties. */
-	JSONObject getProperties() {
-		return properties;
-	}
 	
 	/** This returns a list of point lists, corresponding to the main nodes
 	 * along with any inside rings. This is used for a polygon. */

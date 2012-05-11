@@ -39,7 +39,7 @@ public class OsmMultipoly extends OsmRelation {
 		mp.loadMembers(json, mapTemplate, mapProvision);
 		
 		//flag as loaded
-		mp.loaded = true;
+		mp.setIsLoaded(true);
 	}
 	
 	/** This method must be called to combine the multipolygons, after the
@@ -50,6 +50,7 @@ public class OsmMultipoly extends OsmRelation {
 			for(OsmWay outside:outsides) {
 				if(outside.contains(inside)) {
 					outside.addHole(inside);
+					break;
 				}
 			}
 		}
@@ -59,10 +60,16 @@ public class OsmMultipoly extends OsmRelation {
 			String key = OsmLevel.createZlevelKey(outside.getZcontext(),outside.getZlevel()); 
 			ArrayList<OsmWay> ways = polyMap.get(key);
 			if(ways == null) {
+				//we need to create a list for this level
 				ways = new ArrayList<OsmWay>();
 				polyMap.put(key,ways);
 			}
-			ways.add(outside);
+			ways.add(outside);	
+			
+			//set the parameters to the group parameters
+			outside.setId(this.getId());
+			outside.setFeatureTypeInfo(this.fti);
+			outside.setProperties(this.properties);
 		}
 	}
 	
@@ -104,7 +111,7 @@ public class OsmMultipoly extends OsmRelation {
 				
 				//use the first non-null feature type for the group
 				FeatureTypeInfo wayFti = way.getFeatureTypeInfo();
-				if((fti!= null)&&(wayFti != null)) {
+				if((fti== null)&&(wayFti != null)) {
 					fti = wayFti;
 				}
 				
@@ -148,7 +155,7 @@ public class OsmMultipoly extends OsmRelation {
 		JSONArray multipolyJson = new JSONArray();
 		for(OsmWay way:wayList) {
 			JSONArray wayJson = way.getJsonPointArrayList(lonlatToXY, mapTemplate.COORDINATE_PRECISION);
-			if(wayJson != null) continue;
+			if(wayJson == null) continue;
 			multipolyJson.put(wayJson);
 		}
 		
