@@ -16,8 +16,10 @@ public class OsmWay extends OsmFeature {
 	
 	private final static String WAY_NODES_KEY = "nodes";
 	
+	private ArrayList<OsmNode> nodes = new ArrayList<OsmNode>();
 	
-	ArrayList<OsmNode> nodes = new ArrayList<OsmNode>();
+	private ArrayList<OsmWay> holes = new ArrayList<OsmWay>();
+	private OsmMultipoly multipoly = null;
 	
 	public OsmWay(long id) {
 		super(id);
@@ -86,6 +88,31 @@ public class OsmWay extends OsmFeature {
 		
 	}
 	
+	/** This sets the multipoly, if this way is part of a multipoly. */
+	public void setMultipoly(OsmMultipoly multipoly) {
+		this.multipoly = multipoly;
+	}
+	
+	/** This method returns true is the given member polygon is within the outer ring
+	 * of this member polygon. */
+	public boolean contains(OsmWay insideWay) {
+		if(insideWay.nodes.isEmpty()) return false;
+		
+		//make sure they are on the same level
+		if((insideWay.zlevel != this.zlevel)||(insideWay.zcontext != this.zcontext)) {
+			return false;
+		}
+		
+		//Just check a single point - HANDLE BORDER CASE!!!
+		OsmNode insideNode = insideWay.nodes.get(0);
+		return contains(insideNode);
+	}
+	
+	/** This method adds a way as a whole for this way. */
+	public void addHole(OsmWay insideWay) {
+		this.holes.add(insideWay);
+	}
+	
 	//========================
 	// Protected Methods
 	//========================
@@ -93,12 +120,15 @@ public class OsmWay extends OsmFeature {
 	protected JSONObject getGeometryJson(MapTemplate mapTemplate, AffineTransform lonlatToXY) throws Exception {
 		JSONObject geomJson = new JSONObject();
 		
+		//if this is part of a multipolygon
+		//get the json object from it. It may be non-null or a combination
+		//of multiple ways
+		if(multipoly != null) {
+			return multipoly.getGeomeryForWayObject(this,mapTemplate,lonlatToXY);
+		}
+		
 		//the object must have a type
 		if(fti == null) return null;
-		
-		//get linestring for json
-		JSONArray wayJson = getJsonPointArray(lonlatToXY, mapTemplate.COORDINATE_PRECISION);
-		if(wayJson == null) return null;
 		
 		//load geom type
 		int geomType = fti.getDefaultPathType();
@@ -108,14 +138,13 @@ public class OsmWay extends OsmFeature {
 			//get type
 			typeString = "Polygon";
 			//get coordinates
-			coordJson = new JSONArray();
-			coordJson.put(wayJson);
+			coordJson = getJsonPointArrayList(lonlatToXY, mapTemplate.COORDINATE_PRECISION);
 		}
 		else if(geomType == FeatureTypeInfo.ALLOWED_TYPE_LINE) {
 			//get type
 			typeString = "LineString";
 			//get coordinates
-			coordJson = wayJson;
+			coordJson = getJsonPointArray(nodes,lonlatToXY, mapTemplate.COORDINATE_PRECISION);
 		}
 		else {
 			//no geometry
@@ -127,17 +156,96 @@ public class OsmWay extends OsmFeature {
 
 		return geomJson;
 	}
-
-	private JSONArray getJsonPointArray(AffineTransform lonlatToXY, int precision) throws Exception {
+	
+	//========================
+	// Package Methods
+	//========================
+	
+	/** This method returns the properties. */
+	JSONObject getProperties() {
+		return properties;
+	}
+	
+	/** This returns a list of point lists, corresponding to the main nodes
+	 * along with any inside rings. This is used for a polygon. */
+	JSONArray getJsonPointArrayList(AffineTransform lonlatToXY, int precision) throws Exception {		
+		JSONArray pointJsonArrayList = new JSONArray();
+		JSONArray pointJsonArray = getJsonPointArray(nodes,lonlatToXY,precision);
+		pointJsonArrayList.put(pointJsonArray);
+		for(OsmWay hole:holes) {
+			 pointJsonArray = getJsonPointArray(hole.nodes,lonlatToXY,precision);
+			 pointJsonArrayList.put(pointJsonArray);
+		}
+		return pointJsonArrayList;
+	}
+	
+	/** This returns an json array of points corresponding to the passed node list. */
+	JSONArray getJsonPointArray(ArrayList<OsmNode> nodeList, 
+			AffineTransform lonlatToXY, int precision) throws Exception {
 		
 		JSONArray pointJsonArray = new JSONArray();
-		for(OsmNode node:nodes) {
+		for(OsmNode node:nodeList) {
 			JSONArray point = node.getJsonPoint(lonlatToXY,precision);
 			if(point != null) {
 				pointJsonArray.put(point);
 			}
 		}
 		return pointJsonArray;
+	}
+		
+	//========================
+	// Private Methods
+	//========================
+	
+	private boolean contains(OsmNode inNode) {
+
+		boolean isInside = false;
+		OsmNode prevOutNode = null;
+		for(OsmNode outNode:nodes) {
+			if(prevOutNode == null) {
+				prevOutNode = outNode;
+			}
+			else {
+				//get the value of y where the lines intersect
+				if(halfLineHits(inNode,outNode,prevOutNode)) {
+					isInside = !isInside;
+				}
+			}
+			prevOutNode = outNode;
+		}
+
+		//odd nubmer of hits means inside
+		return isInside;
+	}
+		
+	/** Calculate a vertical line from the test point intersecting the segment
+	* defined by p1 and p2. */
+	private boolean halfLineHits(OsmNode inNode, OsmNode outNode1, OsmNode outNode2) {
+		double x0 = inNode.getLon();
+		double y0 = inNode.getLat();
+		double ax0 = outNode1.getLon();
+		double ay0 = outNode1.getLat();
+		double ax1 = outNode2.getLon();
+		double ay1 = outNode2.getLat();
+
+		if(ax0 == ax1) {
+			return false;
+		}
+		else {
+			double tint = (x0 - ax0)/ (ax1 - ax0);
+			if((tint >= 0)&&(tint < 1)) {
+				double yint = (ay1 - ay0) * tint + ay0;
+				if(yint > y0) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
 	}
 
 			
