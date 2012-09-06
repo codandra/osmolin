@@ -1,0 +1,214 @@
+<html>
+<head>
+<title>OpenLayers + MapQuest</title>
+<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+<script type="text/javascript">
+    var map;
+    var arrayOSM;
+    var arrayAerial;
+    var baseOSM;
+    var baseAerial;
+	var vectorLayer;
+	
+	var tileCache = {};
+	var activeTiles = [];
+	
+	var HALF_METERS = 20037508.34;
+	var TILE_ZOOM = 13;
+	//var MIN_FEATURE_ZOOM = 17;
+ var MIN_FEATURE_ZOOM = 14;   
+	function onMapMoved(event) {
+		var zoom = map.getZoom();
+		
+		var minX;
+		var maxX;
+		var minY;
+		var maxY;
+		if(zoom >= MIN_FEATURE_ZOOM) {
+			//calculate the needed tiles
+			var bounds = map.calculateBounds();
+			minX = xMetersToZoomCoords(bounds.left,TILE_ZOOM);
+			maxX = xMetersToZoomCoords(bounds.right,TILE_ZOOM);
+			minY = yMetersToZoomCoords(bounds.top,TILE_ZOOM);
+			maxY = yMetersToZoomCoords(bounds.bottom,TILE_ZOOM);
+		}
+		else {
+			//clear the map
+			minX = 0;
+			maxX = -1;
+			minY = 0;
+			maxY = -1;
+		}
+		
+		var found;
+		var tile;
+		
+		//remove unneeded tiles
+		for(var it = 0; it < activeTiles.length; ) {
+			tile = activeTiles[it];
+			if((tile.x <minX)||(tile.x > maxX)||(tile.y <minY)||(tile.y > maxY)) {
+				//remove tile, do not increment counter
+				removeTile(it);
+			}
+			else {
+				//increment counter
+				it++;
+			}
+		}
+		//load needed tiles
+		for(var ix = minX; ix <= maxX; ix++) {
+			for(var iy = minY; iy <= maxY; iy++) {
+				found = false;
+				for(var it = 0; it < activeTiles.length; it++) {
+					tile = activeTiles[it];
+					if((tile.x == ix)&&(tile.y == iy)) {
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					addTile(ix,iy);
+				}
+			}
+		}
+		
+		
+		var asdf = "asdf";
+	}
+	
+	function removeTile(index) {
+		var tile = activeTiles[index];
+		tile.active = false;
+		activeTiles.splice(index,1);
+		if(tile.features != null) {
+			vectorLayer.removeFeatures(tile.features);
+		}
+	}
+	
+	function addTile(x,y) {
+		//fetch tile
+		var key = getTileKey(x,y);
+		var tile = tileCache[key];
+		if(tile == null) {
+			tile = {};
+			tile.x = x;
+			tile.y = y;
+			tile.features = null;
+			tile.active = false;
+			tileCache[key] = tile;
+			//request the tile
+			loadTile(tile);
+		}
+		//activate tile
+		tile.active = true;
+		activeTiles.push(tile);
+		if(tile.features != null) {
+			vectorLayer.addFeatures(tile.features);
+		}
+	}
+	
+	function getTileKey(x,y) {
+		return x + "," + y; 
+	}
+	
+	function xMetersToZoomCoords(meters,zoom) {
+		return Math.floor(Math.pow(2,zoom) * (meters + HALF_METERS)/(2 * HALF_METERS));
+	}
+	function yMetersToZoomCoords(meters,zoom) {
+		return Math.floor(Math.pow(2,zoom) * (HALF_METERS - meters)/(2 * HALF_METERS));
+	}
+	function getStyle() {
+		var defaultStyle = new OpenLayers.Style();
+		var rule_basic = new OpenLayers.Rule({
+			symbolizer: {
+				"strokeColor": "#a0a0a0", 
+				"strokeWidth": 1, 
+				"strokeOpactiy":1,
+				"fillColor":"#c0c0c0",
+				"fillOpactiy":1.0
+			}
+		});
+		var rule_label = new OpenLayers.Rule({
+			"filter": new OpenLayers.Filter.Comparison({
+				"type": OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+				"property": "name",
+				"value": null
+			}),
+			"symbolizer": {
+				"label": "${name}",
+				"fontColor": "#000000",
+				"fontOpacity": 1,
+				"fontFamily": "Arial",
+				"fontSize": 16,
+				"fontWeight": "600"
+			}
+		});
+		defaultStyle.addRules([rule_basic, rule_label]);
+		return defaultStyle;
+	}
+	
+    function init(){
+        map = new OpenLayers.Map('map', {
+                    eventListeners: {
+                        "moveend": onMapMoved
+                    }
+                });
+        arrayOSM = ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.jpg",
+                    "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.jpg",
+                    "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.jpg",
+                    "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.jpg"];
+        arrayAerial = ["http://oatile1.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg",
+                        "http://oatile2.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg",
+                        "http://oatile3.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg",
+                        "http://oatile4.mqcdn.com/tiles/1.0.0/sat/${z}/${x}/${y}.jpg"];
+        
+        baseOSM = new OpenLayers.Layer.OSM("MapQuest-OSM Tiles", arrayOSM);
+        baseAerial = new OpenLayers.Layer.OSM("MapQuest Open Aerial Tiles", arrayAerial);
+		var styleMap = getStyle();
+		vectorLayer = new OpenLayers.Layer.Vector("Overlays", {
+			"styleMap": styleMap,
+			"sphericalMercator": true
+		});
+       
+        map.addLayer(baseOSM);
+        map.addLayer(baseAerial);
+		map.addLayer(vectorLayer);
+        map.addControl(new OpenLayers.Control.LayerSwitcher());
+        map.setCenter(
+            new OpenLayers.LonLat(-71.057205,42.362942).transform(
+                new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject()), 16
+        );       
+    }
+	
+	//testing methods
+	function loadTile(tile) {
+		var minX = zoomCoordsToXMeters(tile.x,TILE_ZOOM);
+		var maxX = zoomCoordsToXMeters(tile.x + 1,TILE_ZOOM);
+		var minY = zoomCoordsToYMeters(tile.y,TILE_ZOOM);
+		var maxY = zoomCoordsToYMeters(tile.y + 1,TILE_ZOOM);
+		
+		//create 1 dummy geometry
+		var pointList = [];
+		pointList.push(new OpenLayers.Geometry.Point((2 * minX + maxX)/3,(2 * minY + maxY)/3));
+		pointList.push(new OpenLayers.Geometry.Point((minX + 2 *maxX)/3,(2 * minY + maxY)/3));
+		pointList.push(new OpenLayers.Geometry.Point((minX + 2 * maxX)/3,(minY + 2 * maxY)/3));
+		pointList.push(new OpenLayers.Geometry.Point((2 * minX + maxX)/3,(minY + 2 * maxY)/3));
+		pointList.push(pointList[0]);
+		var linearRing = new OpenLayers.Geometry.LinearRing(pointList);
+		var polygonFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Polygon([linearRing]));
+		
+		tile.features = [polygonFeature];
+	}
+	function zoomCoordsToXMeters(tileX,zoom) {
+		return (tileX / Math.pow(2,zoom)) * 2 * HALF_METERS - HALF_METERS;
+	}
+	function zoomCoordsToYMeters(tileY,zoom) {
+		return HALF_METERS - (tileY / Math.pow(2,zoom)) * 2 * HALF_METERS;
+	}
+</script>
+</head>
+
+<body onload="init()">
+    <div id="map"></div>
+</body>
+</html>
