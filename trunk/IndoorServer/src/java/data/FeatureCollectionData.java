@@ -12,7 +12,12 @@ import org.json.*;
 import java.util.*;
 
 /**
- *
+ * This is a lookup for GeoJSON feature objects based on tile. Non-point objects
+ * are returned in the tile associated with the approximate centroid of the object.
+ * The URL is of the format:
+ * [base service url]/featurecollection/[layer name]/[zoom]/[tileX]/[tileY].
+ * 
+ * The body is a feature collection GeoJSON object. 
  * @author sutter
  */
 public class FeatureCollectionData extends HttpServlet {
@@ -48,7 +53,7 @@ public class FeatureCollectionData extends HttpServlet {
 			int tileY = params.tileY;
 			int zoom = params.zoom;
 			
-			String quadkey = Util.getQuadkey(tileX,tileY,zoom);
+			String quadkey = MercatorCoordinates.getQuadkey(tileX,tileY,zoom);
 			String pattern = quadkey + "%";
 			
 
