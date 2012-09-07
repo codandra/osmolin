@@ -9,9 +9,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.*;
+import java.awt.geom.Point2D;
 
 /**
- *
+ * This service handle get, put and delete for a GeoJSON web service. The GeoJSON should
+ * be in longitude and latitude degrees. The URL is in the format 
+ * [base service url]/feature/[layer name]/[key]. The body is the GeoJSON object.
+ * 
  * @author sutter
  */
 public class FeatureData extends HttpServlet {
@@ -32,10 +36,6 @@ public class FeatureData extends HttpServlet {
 	private final static String DELETE_STMT = "delete from feature where layer = ? and feature_key = ?";
 	public final static int DELETE_LAYER_INDEX = 1;
 	public final static int DELETE_KEY_INDEX = 2;
-	
-	private final static String TYPE_POLYGON = "polygon";
-	private final static String TYPE_LINESTRING = "linestring";
-	private final static String TYPE_POINT = "point";
 	
 	/**
 	 * Handles the HTTP
@@ -101,7 +101,11 @@ public class FeatureData extends HttpServlet {
 			RequestParams requestParams = RequestParams.loadParams(request);
 			JSONObject featureJson = Util.readJson(request.getInputStream());
 			
-			String quadkey = getFeatureQuadkey(featureJson);
+			//find the centroid of the feature and get the quadkey for it
+			Point2D centroid = GeoJsonUtils.getGeoJsonCentroid(featureJson);
+			double mx = MercatorCoordinates.lonRadToMx(Math.toRadians(centroid.getX()));
+			double my = MercatorCoordinates.latRadToMy(Math.toRadians(centroid.getY()));
+			String quadkey = MercatorCoordinates.getQuadkeyMax(mx,my);
 
 			conn = Util.getConnection(this.getServletContext());
 			
@@ -179,65 +183,6 @@ public class FeatureData extends HttpServlet {
 	public String getServletInfo() {
 		return "Short description";
 	}// </editor-fold>
-	
-	private String getFeatureQuadkey(JSONObject featureJson) throws Exception {
-		String type = featureJson.optString("type",null);
-		if(type == null) {
-			throw new Exception("Feature type parameter not found.");
-		}
-		
-		JSONArray coordinates = featureJson.getJSONArray("coordinates");
-		
-		//get the average position for the feature
-		
-		double xAve = 0;
-		double yAve = 0;
-		int count = 0;
-		if(type.equalsIgnoreCase(TYPE_POLYGON)) {
-			//get the average of the leading line string (outside)
-			JSONArray lineString = coordinates.getJSONArray(0);
-			int cnt = lineString.length();
-			for(int i = 0; i < cnt; i++) {
-				JSONArray point = lineString.getJSONArray(i);
-				xAve += point.getDouble(0);
-				yAve += point.getDouble(1);
-				count++;
-			}
-		}
-		else if(type.equalsIgnoreCase(TYPE_LINESTRING)) {
-			//get the average of the leading line string (outside)
-			JSONArray lineString = coordinates;
-			int cnt = lineString.length();
-			for(int i = 0; i < cnt; i++) {
-				JSONArray point = lineString.getJSONArray(i);
-				xAve += point.getDouble(0);
-				yAve += point.getDouble(1);
-				count++;
-			}
-		}
-		else if(type.equalsIgnoreCase(TYPE_POINT)) {
-			//get the average of the leading line string (outside)
-			JSONArray point = coordinates;
-			xAve += point.getDouble(0);
-			yAve += point.getDouble(1);
-			count++;
-		}
-		else {
-			throw new Exception("Unsupported feature type: " + type);
-		}
-		
-		if(count > 0) {
-			xAve /= count;
-			yAve /= count;
-		}
-		
-		double mx = Util.mercMetersXToMercX(xAve);
-		double my = Util.mercMetersYToMercY(yAve);
-		
-		String quadKey = Util.getQuadkeyMax(mx, my);
-		
-		return quadKey;
-	}
 	
 	private static class RequestParams {
 		
