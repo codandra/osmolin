@@ -9,9 +9,16 @@
     var baseOSM;
     var baseAerial;
 	var vectorLayer;
+	var selectControl;
 	
 	var tileCache = {};
 	var activeTiles = [];
+	
+	var proj900913 = new OpenLayers.Projection("EPSG:900913");
+    var projWGS84 = new OpenLayers.Projection("EPSG:4326");
+	
+	var selection;
+	var popup;
 	
 	var HALF_METERS = 20037508.34;
 	var TILE_ZOOM = 13;
@@ -166,45 +173,88 @@
         baseAerial = new OpenLayers.Layer.OSM("MapQuest Open Aerial Tiles", arrayAerial);
 		var styleMap = getStyle();
 		vectorLayer = new OpenLayers.Layer.Vector("Overlays", {
-			"styleMap": styleMap,
+			styleMap: styleMap,
 			"sphericalMercator": true
 		});
-       
+		
+		vectorLayer.events.on({
+					'featureselected':onFeatureSelect,
+					'featureunselected':onFeatureUnselect
+				});
+				
         map.addLayer(baseOSM);
         map.addLayer(baseAerial);
 		map.addLayer(vectorLayer);
         map.addControl(new OpenLayers.Control.LayerSwitcher());
+		
+		selectControl = new OpenLayers.Control.SelectFeature(vectorLayer);
+		map.addControl(selectControl);
+		selectControl.activate();
+		
         map.setCenter(
             new OpenLayers.LonLat(-71.057205,42.362942).transform(
                 new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject()), 16
-        );       
+        );    
+			
+		popup = new OpenLayers.Popup.FramedCloud("featurePopup",
+									null,
+									new OpenLayers.Size(100,100),
+									"",
+									null, true, this.onPopupClose);
     }
 	
-	//testing methods
+	
 	function loadTile(tile) {
-		var minX = zoomCoordsToXMeters(tile.x,TILE_ZOOM);
-		var maxX = zoomCoordsToXMeters(tile.x + 1,TILE_ZOOM);
-		var minY = zoomCoordsToYMeters(tile.y,TILE_ZOOM);
-		var maxY = zoomCoordsToYMeters(tile.y + 1,TILE_ZOOM);
+		var config = {};
+		config.url = "http://localhost:8080/mapdata/featurecollection/xxx/" + TILE_ZOOM + "/" + tile.x + "/" + tile.y;
+var d = new Date();
+config.url = config.url + "?t=" + d.getTime();
+		config.callback = onTileDownload;
+		var xmlhttp = OpenLayers.Request.GET(config);
+	}
+
+	function onTileDownload(xmlhttp) {
+		var data = eval('(' + xmlhttp.responseText + ')');
+		var key = getTileKey(data.tileX,data.tileY);
+		var tile = tileCache[key];
+		if(tile) {
+			var parser = new OpenLayers.Format.GeoJSON();		
+			tile.features = parser.read(data);
+			transformFeatures(tile.features);
+			if(tile.active) {
+				vectorLayer.addFeatures(tile.features);
+			}
+		}
+	}
+	function transformFeatures(features) {
+		var cnt = features.length;
+		for(var i = 0; i < cnt; i++) {
+			features[i].geometry.transform(projWGS84,proj900913);
+		}
+	}
 		
-		//create 1 dummy geometry
-		var pointList = [];
-		pointList.push(new OpenLayers.Geometry.Point((2 * minX + maxX)/3,(2 * minY + maxY)/3));
-		pointList.push(new OpenLayers.Geometry.Point((minX + 2 *maxX)/3,(2 * minY + maxY)/3));
-		pointList.push(new OpenLayers.Geometry.Point((minX + 2 * maxX)/3,(minY + 2 * maxY)/3));
-		pointList.push(new OpenLayers.Geometry.Point((2 * minX + maxX)/3,(minY + 2 * maxY)/3));
-		pointList.push(pointList[0]);
-		var linearRing = new OpenLayers.Geometry.LinearRing(pointList);
-		var polygonFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Polygon([linearRing]));
-		
-		tile.features = [polygonFeature];
-	}
-	function zoomCoordsToXMeters(tileX,zoom) {
-		return (tileX / Math.pow(2,zoom)) * 2 * HALF_METERS - HALF_METERS;
-	}
-	function zoomCoordsToYMeters(tileY,zoom) {
-		return HALF_METERS - (tileY / Math.pow(2,zoom)) * 2 * HALF_METERS;
-	}
+	function onPopupClose(evt) {
+			selectControl.unselect(selection);
+		}
+	function onFeatureSelect(evt) {
+			var feature = evt.feature;
+			
+			selection = feature;
+			popup = new OpenLayers.Popup.FramedCloud("featurePopup",
+									feature.geometry.getBounds().getCenterLonLat(),
+									new OpenLayers.Size(100,100),
+									"<h2>" + feature.data.name + "</h2> This is feature " + feature.id,
+									null, true, onPopupClose);
+			map.addPopup(popup);
+		}
+	function onFeatureUnselect(evt) {
+			selection = null;
+			if (popup) {
+				map.removePopup(popup);
+				popup.destroy();
+				popup = null;
+			}
+		}
 </script>
 </head>
 
