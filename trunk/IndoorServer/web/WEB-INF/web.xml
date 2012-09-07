@@ -16,6 +16,14 @@
         <servlet-name>FileData</servlet-name>
         <servlet-class>data.FileData</servlet-class>
     </servlet>
+	<servlet>
+        <servlet-name>FeatureData</servlet-name>
+        <servlet-class>data.FeatureData</servlet-class>
+    </servlet>
+	<servlet>
+        <servlet-name>FeatureCollectionData</servlet-name>
+        <servlet-class>data.FeatureCollectionData</servlet-class>
+    </servlet>
     <servlet>
         <servlet-name>FileAccessServlet</servlet-name>
         <servlet-class>intransix.indoor.appengine.FileAccessServlet</servlet-class>
@@ -27,6 +35,14 @@
     <servlet-mapping>
         <servlet-name>FileData</servlet-name>
         <url-pattern>/file/*</url-pattern>
+    </servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>FeatureData</servlet-name>
+        <url-pattern>/feature/*</url-pattern>
+    </servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>FeatureCollectionData</servlet-name>
+        <url-pattern>/featurecollection/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
