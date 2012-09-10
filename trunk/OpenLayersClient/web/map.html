@@ -29,7 +29,7 @@
 				for(var i = 0; i < pairs.length; i++) {
 					var pairString = pairs[i];
 					var pairArray = pairString.split('=');
-					if((pairArray.length == 2)&&(pairArray[0] = key)) return pairArray[1];
+					if((pairArray.length == 2)&&(pairArray[0] == key)) return pairArray[1];
 				}
 				return null;
 			}
