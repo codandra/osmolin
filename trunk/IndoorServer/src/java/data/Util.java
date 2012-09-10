@@ -5,6 +5,7 @@ import javax.servlet.ServletContext;
 
 import javax.naming.InitialContext;
 import java.sql.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import org.json.JSONObject;
 
@@ -25,12 +26,29 @@ public class Util {
 		return conn;
 	}
 	
+	/** This method gets the given context parameter. */
 	public static String getContextParam(String tag, ServletContext context) throws Exception {
 		String stringValue = context.getInitParameter(tag);
 		if(stringValue == null) {
 			throw new Exception("Context value not set: " + tag);
 		}
 		return stringValue;
+	}
+	
+	/** This method returns the list of parameters that appear after the base URL
+	 * pattern. 
+	 * 
+	 * @param request	The http request
+	 * @return			An array of string parameters.
+	 */
+	public static String[] getPathParameters(HttpServletRequest request) {
+		String path = request.getPathInfo();
+		if(path.charAt(0) == '/') {
+			path = path.substring(1);
+		}
+
+		String[] params = path.split("/");
+		return params;
 	}
 	
 	/** This method closes the object if it is not null, wrapping it in a try block

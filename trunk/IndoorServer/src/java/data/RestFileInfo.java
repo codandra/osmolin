@@ -15,17 +15,12 @@ class RestFileInfo {
 	int version;
 
 	static RestFileInfo loadFileInfo(HttpServletRequest request) throws Exception {
-		RestFileInfo fileInfo = new RestFileInfo();
-
-		String path = request.getPathInfo();
-		if(path.charAt(0) == '/') {
-			path = path.substring(1);
-		}
-
-		String[] params = path.split("/");
-		if(params.length < 2) throw new Exception("Invalid request format");
-
+		
+		String[] params = Util.getPathParameters(request);
+		
 		//url pattern "/name/key/version"
+		if(params.length < 2) throw new Exception("Invalid request format");
+		RestFileInfo fileInfo = new RestFileInfo();
 		fileInfo.name = params[0];
 		fileInfo.key = params[1];
 		if(params.length > 2) {

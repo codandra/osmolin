@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class FeatureCollectionData extends HttpServlet {
 	
-	private final static String SELECT_STMT = "select * from feature where quadkey like ?";
+	private final static String SELECT_STMT = "select * from feature where layer = ? and quadkey like ?";
 
 	
 	/**
@@ -44,21 +44,23 @@ public class FeatureCollectionData extends HttpServlet {
 		OutputStream os = null;
 		try {
 			
-			RequestParams params = RequestParams.loadParams(request);
+			String[] params = Util.getPathParameters(request);
+			//url pattern "/layer/zoom/tileX/tileY"
+			if(params.length < 4) throw new Exception("Invalid request format");
 
-			conn = Util.getConnection(this.getServletContext());
-			
-			String layer = params.layer;
-			int tileX = params.tileX;
-			int tileY = params.tileY;
-			int zoom = params.zoom;
+			String layer = params[0];
+			int zoom = Integer.parseInt(params[1]);
+			int tileX = Integer.parseInt(params[2]); 
+			int tileY = Integer.parseInt(params[3]); 
 			
 			String quadkey = MercatorCoordinates.getQuadkey(tileX,tileY,zoom);
 			String pattern = quadkey + "%";
 			
 
+			conn = Util.getConnection(this.getServletContext());
 			pstmt = conn.prepareStatement(SELECT_STMT);
-			pstmt.setString(1,pattern);
+			pstmt.setString(1,layer);
+			pstmt.setString(2,pattern);
 			rs = pstmt.executeQuery();
 			List<FeatureRecord> featureRecords = new ArrayList<FeatureRecord>();
 			FeatureRecord featureRecord;
@@ -117,40 +119,6 @@ public class FeatureCollectionData extends HttpServlet {
 		}
 		
 		return json;
-	}
-	
-	private static class RequestParams {
-
-		public String layer;
-		public int tileX;
-		public int tileY;
-		public int zoom;
-		
-		public static RequestParams loadParams(HttpServletRequest request) throws Exception {
-			
-			RequestParams requestParams = new RequestParams();
-			
-			String path = request.getPathInfo();
-			if(path.charAt(0) == '/') {
-				path = path.substring(1);
-			}
-
-			String[] params = path.split("/");
-			if(params.length < 4) throw new Exception("Invalid request format");
-
-			//url pattern "/name/key/version"
-			requestParams.layer = params[0];
-			String temp;
-			
-			temp = params[1];
-			requestParams.zoom = Integer.parseInt(temp);
-			temp = params[2];
-			requestParams.tileX = Integer.parseInt(temp); 
-			temp = params[3];
-			requestParams.tileY = Integer.parseInt(temp); 
-			
-			return requestParams;
-		}
 	}
 	
 }
