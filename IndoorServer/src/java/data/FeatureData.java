@@ -23,16 +23,22 @@ public class FeatureData extends HttpServlet {
 	private final static String SELECT_STMT = "select * from feature where layer = ? and feature_key = ?";
 	public final static int SELECT_LAYER_INDEX = 1;
 	public final static int SELECT_KEY_INDEX = 2;
-	private final static String INSERT_STMT = "insert into feature (layer,feature_key,quadkey,feature) values (?,?,?,?)";
+	private final static String INSERT_STMT = "insert into feature (layer,feature_key,quadkey,feature,lat,lon,name) values (?,?,?,?,?,?,?)";
 	public final static int INSERT_LAYER_INDEX = 1;
 	public final static int INSERT_KEY_INDEX = 2;
 	public final static int INSERT_QUADKEY_INDEX = 3;
 	public final static int INSERT_FEATURE_INDEX = 4;
-	private final static String UPDATE_STMT = "update feature set quadkey=?, feature=? where layer=? and feature_key=?";
-	public final static int UPDATE_LAYER_INDEX = 3;
-	public final static int UPDATE_KEY_INDEX = 4;
+	public static int INSERT_LAT_INDEX = 5;
+	public static int INSERT_LON_INDEX = 6;
+	public final static int INSERT_NAME_INDEX = 7;
+	private final static String UPDATE_STMT = "update feature set quadkey=?, feature=? , lat=?, lon=?, name=? where layer=? and feature_key=?";
+	public final static int UPDATE_LAYER_INDEX = 6;
+	public final static int UPDATE_KEY_INDEX = 7;
 	public final static int UPDATE_QUADKEY_INDEX = 1;
 	public final static int UPDATE_FEATURE_INDEX = 2;
+	public static int UPDATE_LAT_INDEX = 3;
+	public static int UPDATE_LON_INDEX = 4;
+	public final static int UPDATE_NAME_INDEX = 5;
 	private final static String DELETE_STMT = "delete from feature where layer = ? and feature_key = ?";
 	public final static int DELETE_LAYER_INDEX = 1;
 	public final static int DELETE_KEY_INDEX = 2;
@@ -56,12 +62,17 @@ public class FeatureData extends HttpServlet {
 		OutputStream os = null;
 		try {
 
-			RequestParams requestParams = RequestParams.loadParams(request);
+			String[] params = Util.getPathParameters(request);
+			
+			//url pattern "/layer/key"
+			if(params.length < 2) throw new Exception("Invalid request format");
+			String layer = params[0];
+			String key = params[1];
 
 			conn = Util.getConnection(this.getServletContext());
 			pstmt = conn.prepareStatement(SELECT_STMT);
-			pstmt.setString(SELECT_LAYER_INDEX,requestParams.layer);
-			pstmt.setString(SELECT_KEY_INDEX,requestParams.key);
+			pstmt.setString(SELECT_LAYER_INDEX,layer);
+			pstmt.setString(SELECT_KEY_INDEX,key);
 			rs = pstmt.executeQuery();
 			FeatureRecord featureRecord;
 			if(rs.next()) {
@@ -98,7 +109,13 @@ public class FeatureData extends HttpServlet {
 		InputStream is = null;
 		try {
 			
-			RequestParams requestParams = RequestParams.loadParams(request);
+			String[] params = Util.getPathParameters(request);
+			
+			//url pattern "/layer/key"
+			if(params.length < 2) throw new Exception("Invalid request format");
+			String layer = params[0];
+			String key = params[1];
+			
 			JSONObject featureJson = Util.readJson(request.getInputStream());
 			
 			//find the centroid of the feature and get the quadkey for it
@@ -106,29 +123,42 @@ public class FeatureData extends HttpServlet {
 			double mx = MercatorCoordinates.lonRadToMx(Math.toRadians(centroid.getX()));
 			double my = MercatorCoordinates.latRadToMy(Math.toRadians(centroid.getY()));
 			String quadkey = MercatorCoordinates.getQuadkeyMax(mx,my);
+			
+			//get the name
+			String name = null;
+			JSONObject properties = featureJson.optJSONObject("properties");
+			if(properties != null) {
+				name = properties.getString("name");
+			}
 
 			conn = Util.getConnection(this.getServletContext());
 			
 			//check if there is a record already
 			pstmt = conn.prepareStatement(SELECT_STMT);
-			pstmt.setString(SELECT_LAYER_INDEX,requestParams.layer);
-			pstmt.setString(SELECT_KEY_INDEX,requestParams.key);
+			pstmt.setString(SELECT_LAYER_INDEX,layer);
+			pstmt.setString(SELECT_KEY_INDEX,key);
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
 				//update this record
 				pstmt = conn.prepareStatement(UPDATE_STMT);
-				pstmt.setString(UPDATE_LAYER_INDEX,requestParams.layer);
-				pstmt.setString(UPDATE_KEY_INDEX,requestParams.key);
+				pstmt.setString(UPDATE_LAYER_INDEX,layer);
+				pstmt.setString(UPDATE_KEY_INDEX,key);
 				pstmt.setString(UPDATE_QUADKEY_INDEX,quadkey);
 				pstmt.setString(UPDATE_FEATURE_INDEX,featureJson.toString());
+				pstmt.setDouble(UPDATE_LON_INDEX,centroid.getX());
+				pstmt.setDouble(UPDATE_LAT_INDEX,centroid.getY());
+				pstmt.setString(UPDATE_NAME_INDEX,name);
 			}
 			else {
 				//create a new record
 				pstmt = conn.prepareStatement(INSERT_STMT);
-				pstmt.setString(INSERT_LAYER_INDEX,requestParams.layer);
-				pstmt.setString(INSERT_KEY_INDEX,requestParams.key);
+				pstmt.setString(INSERT_LAYER_INDEX,layer);
+				pstmt.setString(INSERT_KEY_INDEX,key);
 				pstmt.setString(INSERT_QUADKEY_INDEX,quadkey);
 				pstmt.setString(INSERT_FEATURE_INDEX,featureJson.toString());
+				pstmt.setDouble(INSERT_LON_INDEX,centroid.getX());
+				pstmt.setDouble(INSERT_LAT_INDEX,centroid.getY());
+				pstmt.setString(INSERT_NAME_INDEX,name);
 			}	
 		
 			pstmt.executeUpdate();
@@ -155,12 +185,17 @@ public class FeatureData extends HttpServlet {
 		Connection conn = null;
 		try {
 			
-			RequestParams requestParams = RequestParams.loadParams(request);
+			String[] params = Util.getPathParameters(request);
+			
+			//url pattern "/layer/key"
+			if(params.length < 2) throw new Exception("Invalid request format");
+			String layer = params[0];
+			String key = params[1];
 
 			conn = Util.getConnection(this.getServletContext());
 			pstmt = conn.prepareStatement(DELETE_STMT);
-			pstmt.setString(DELETE_LAYER_INDEX,requestParams.layer);
-			pstmt.setString(DELETE_KEY_INDEX,requestParams.key);
+			pstmt.setString(DELETE_LAYER_INDEX,layer);
+			pstmt.setString(DELETE_KEY_INDEX,key);
 			pstmt.executeUpdate();
 			conn.commit();
 		}
@@ -183,31 +218,6 @@ public class FeatureData extends HttpServlet {
 	public String getServletInfo() {
 		return "Short description";
 	}// </editor-fold>
-	
-	private static class RequestParams {
-		
-		public String layer;
-		public String key;
-		
-		public static RequestParams loadParams(HttpServletRequest request) throws Exception {
-			
-			RequestParams requestParams = new RequestParams();
-			
-			String path = request.getPathInfo();
-			if(path.charAt(0) == '/') {
-				path = path.substring(1);
-			}
-
-			String[] params = path.split("/");
-			if(params.length < 2) throw new Exception("Invalid request format");
-
-			//url pattern "/name/key/version"
-			requestParams.layer = params[0];
-			requestParams.key = params[1];
-			
-			return requestParams;
-		}
-	}
 
 }
 
