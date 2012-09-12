@@ -1,6 +1,6 @@
 indoor = {};
 
-indoor.HOST_URL = "http://localhost:8080/mapdata";
+indoor.HOST_URL = "http://open.micello.com/mapdata";
 
 indoor.getMapUrl = function(mapId) {
 	return indoor.HOST_URL + "/file/indoormap/" + mapId;
