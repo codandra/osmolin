@@ -10,7 +10,7 @@ function getStyleMap() {
 			"fillOpactiy":1.0
 		}
 	});
-	var rule_label = new OpenLayers.Rule({
+	var rule_label_name = new OpenLayers.Rule({
 		"filter": new OpenLayers.Filter.Comparison({
 			"type": OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
 			"property": "name",
@@ -21,11 +21,36 @@ function getStyleMap() {
 			"fontColor": "#000000",
 			"fontOpacity": 1,
 			"fontFamily": "Arial",
-			"fontSize": 16,
+			"fontSize": 12,
 			"fontWeight": "600"
 		}
 	});
-	defaultStyle.addRules([rule_basic, rule_label]);
+	var rule_label_ref = new OpenLayers.Rule({
+		"filter": new OpenLayers.Filter.Logical({
+			"type": OpenLayers.Filter.Logical.AND,
+			"filters": [
+				new OpenLayers.Filter.Comparison({
+					"type": OpenLayers.Filter.Comparison.EQUAL_TO,
+					"property": "name",
+					"value": null
+				}),
+				new OpenLayers.Filter.Comparison({
+					"type": OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+					"property": "ref",
+					"value": null
+				})
+			]
+		}),
+		"symbolizer": {
+			"label": "${ref}",
+			"fontColor": "#000000",
+			"fontOpacity": 1,
+			"fontFamily": "Arial",
+			"fontSize": 12,
+			"fontWeight": "600"
+		}
+	});
+	defaultStyle.addRules([rule_basic, rule_label_name,rule_label_ref]);
 	
 	var styles = new OpenLayers.StyleMap(defaultStyle);
 	styles.addUniqueValueRules("default", "buildingpart", {
