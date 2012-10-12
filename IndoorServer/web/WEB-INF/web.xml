@@ -8,6 +8,15 @@
         <param-name>base_path</param-name>
         <param-value>/opt/osmdata/</param-value>
     </context-param>
+    <filter>
+        <description>Allows Cross Domain Access</description>
+        <filter-name>CrossDomainFilter</filter-name>
+        <filter-class>filter.CrossDomainFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CrossDomainFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <servlet>
         <servlet-name>Version</servlet-name>
         <servlet-class>data.Version</servlet-class>
@@ -16,15 +25,15 @@
         <servlet-name>FileData</servlet-name>
         <servlet-class>data.FileData</servlet-class>
     </servlet>
-	<servlet>
+    <servlet>
         <servlet-name>FeatureData</servlet-name>
         <servlet-class>data.FeatureData</servlet-class>
     </servlet>
-	<servlet>
+    <servlet>
         <servlet-name>FeatureCollectionData</servlet-name>
         <servlet-class>data.FeatureCollectionData</servlet-class>
     </servlet>
-	<servlet>
+    <servlet>
         <servlet-name>FeatureListData</servlet-name>
         <servlet-class>data.FeatureListData</servlet-class>
     </servlet>
@@ -40,15 +49,15 @@
         <servlet-name>FileData</servlet-name>
         <url-pattern>/file/*</url-pattern>
     </servlet-mapping>
-	<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>FeatureData</servlet-name>
         <url-pattern>/feature/*</url-pattern>
     </servlet-mapping>
-	<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>FeatureCollectionData</servlet-name>
         <url-pattern>/featurecollection/*</url-pattern>
     </servlet-mapping>
-	<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>FeatureListData</servlet-name>
         <url-pattern>/featurelist/*</url-pattern>
     </servlet-mapping>
