@@ -1,0 +1,1 @@
+This is a OpenLayers client to display indoor maps for OSM.
